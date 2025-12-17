@@ -21,9 +21,7 @@
         .click-anim { animation: pulse 0.2s; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
-        /* Estilo para data selecionada */
         .data-ativa { background-color: #2563eb !important; color: white !important; border-color: #2563eb !important; }
-        
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -36,9 +34,8 @@
                 <i class="fas fa-shapes text-2xl text-yellow-400"></i>
                 <h1 class="text-xl font-bold">Casa de Criança</h1>
             </div>
-            
             <button id="btn-sair-admin" onclick="sairAdmin()" class="hidden text-sm bg-red-500/80 hover:bg-red-600 px-3 py-1 rounded text-white transition">
-                <i class="fas fa-sign-out-alt mr-1"></i> Sair do Admin
+                <i class="fas fa-sign-out-alt mr-1"></i> Sair
             </button>
         </div>
     </header>
@@ -62,15 +59,13 @@
                 </div>
 
                 <div id="area-datas" class="hidden text-left max-w-4xl mx-auto">
-                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="far fa-calendar-alt mr-2"></i>1. Escolha uma Data</h3>
-                    <div id="lista-datas" class="flex flex-wrap gap-3 justify-center md:justify-start mb-8">
-                        </div>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">1. Escolha uma Data</h3>
+                    <div id="lista-datas" class="flex flex-wrap gap-3 justify-center md:justify-start mb-8"></div>
                 </div>
 
                 <div id="area-horarios" class="hidden text-left max-w-4xl mx-auto border-t border-slate-100 pt-6 fade-in">
-                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="far fa-clock mr-2"></i>2. Escolha um Horário</h3>
-                    <div id="grid-horarios" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        </div>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">2. Escolha um Horário</h3>
+                    <div id="grid-horarios" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
                 </div>
 
                 <div id="msg-vazia" class="hidden text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-slate-200 mt-6">
@@ -85,7 +80,7 @@
             <div class="bg-teal-50 border border-teal-200 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex-1">
                     <h3 class="font-bold text-teal-900 text-lg flex items-center gap-2"><i class="fas fa-share-alt"></i> Link para os Pais</h3>
-                    <p class="text-teal-700 text-sm mt-1">Os pais verão apenas o calendário acima. O acesso admin é oculto.</p>
+                    <p class="text-teal-700 text-sm mt-1">Gere o QR Code para compartilhar.</p>
                 </div>
                 <div class="flex flex-col items-center gap-3">
                     <div id="qrcode" class="bg-white p-2 rounded shadow-sm"></div>
@@ -131,14 +126,31 @@
                 </div>
             </div>
 
-            <div class="flex justify-between items-center bg-purple-50 border border-purple-200 p-4 rounded-xl">
-                <div>
-                    <h3 class="font-bold text-purple-900"><i class="fas fa-print mr-2"></i>Relatórios</h3>
-                    <p class="text-purple-600 text-xs">Imprimir lista de presença.</p>
+            <div class="bg-purple-50 border border-purple-200 p-6 rounded-2xl shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+                    <div class="w-full md:w-auto">
+                        <h3 class="font-bold text-purple-900 text-lg mb-1"><i class="fas fa-print mr-2"></i>Centro de Impressão</h3>
+                        <p class="text-purple-600 text-sm mb-3">Selecione uma turma específica para imprimir ou imprima o relatório geral.</p>
+                        
+                        <div class="flex gap-2 items-center">
+                            <div class="relative w-full md:w-64">
+                                <select id="select-impressao" class="w-full p-2.5 pl-9 border border-purple-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-purple-500 outline-none">
+                                    <option value="" disabled selected>Escolha a turma...</option>
+                                    </select>
+                                <i class="fas fa-users absolute left-3 top-3 text-purple-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 w-full md:w-auto">
+                        <button onclick="imprimirSelecionado()" class="flex-1 md:flex-none bg-purple-700 hover:bg-purple-800 text-white font-bold py-2.5 px-6 rounded-lg shadow transition flex items-center justify-center gap-2">
+                            <i class="fas fa-file-pdf"></i> Imprimir Turma
+                        </button>
+                        <button onclick="imprimirRelatorio(null)" class="bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 font-bold py-2.5 px-4 rounded-lg shadow-sm transition flex items-center justify-center" title="Imprimir Todas">
+                            <i class="fas fa-globe"></i>
+                        </button>
+                    </div>
                 </div>
-                <button onclick="imprimirRelatorio()" class="bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded shadow transition text-sm">
-                    Imprimir
-                </button>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -162,7 +174,7 @@
                 </div>
             </div>
             
-            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+             <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                 <div class="flex gap-2 items-center">
                     <input type="file" id="input-excel" accept=".xlsx" class="text-xs text-slate-500 w-full"/>
                     <button onclick="processarExcel()" class="bg-indigo-600 text-white px-4 py-1 rounded text-xs font-bold hover:bg-indigo-700">Importar</button>
@@ -193,9 +205,9 @@
 
         let todosDados = [];
         let isAdmin = false;
-        let horariosTurmaSelecionada = []; // Cache temporário
+        let horariosTurmaSelecionada = [];
 
-        // 1. SISTEMA ADMIN SECRETO
+        // ADMIN LOGIN
         let logoClicks = 0;
         window.tentarAcessoAdmin = async () => {
             logoClicks++;
@@ -209,7 +221,6 @@
             const { value: senha } = await Swal.fire({
                 title: 'Acesso Restrito',
                 input: 'password',
-                inputPlaceholder: 'Senha Admin',
                 showCancelButton: true
             });
             if (senha === '1992') ativarModoAdmin();
@@ -223,6 +234,13 @@
             document.getElementById('btn-sair-admin').classList.remove('hidden');
             renderAdminTable();
             gerarQRCode();
+            
+            // Popula o select de impressão clonando o do gerador para garantir as mesmas opções
+            const selectGen = document.getElementById('gen-turma');
+            const selectPrint = document.getElementById('select-impressao');
+            if(selectGen && selectPrint) {
+                selectPrint.innerHTML = '<option value="" disabled selected>Escolha a turma...</option>' + selectGen.innerHTML;
+            }
         }
 
         window.sairAdmin = () => {
@@ -248,18 +266,17 @@
             document.getElementById('link-atual').innerText = urlLimpa;
         }
 
-        // 2. LOGICA PRINCIPAL
+        // DATABASE LISTENER
         const q = query(colRef, orderBy("timestamp", "asc"));
         onSnapshot(q, (snapshot) => {
             todosDados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             atualizarDropdownTurmas();
             if(isAdmin) renderAdminTable();
-            // Se já tiver uma turma selecionada na view dos pais, atualiza ela
             const turmaAtual = document.getElementById('filtro-turma-pais').value;
             if(turmaAtual) selecionarTurma();
         });
 
-        // 3. NOVO FLUXO DOS PAIS (CALENDÁRIO)
+        // VIEW PAIS
         function atualizarDropdownTurmas() {
             const turmasUnicas = [...new Set(todosDados.map(item => item.turma))].sort();
             const select = document.getElementById('filtro-turma-pais');
@@ -272,18 +289,14 @@
 
         window.selecionarTurma = () => {
             const turma = document.getElementById('filtro-turma-pais').value;
-            const areaDatas = document.getElementById('area-datas');
-            const listaDatas = document.getElementById('lista-datas');
-            const areaHorarios = document.getElementById('area-horarios');
-            const msg = document.getElementById('msg-vazia');
-
             if(!turma) return;
-
-            // Filtra horários disponíveis desta turma
             horariosTurmaSelecionada = todosDados.filter(i => i.turma === turma && i.disponivel);
             
-            areaHorarios.classList.add('hidden'); // Esconde horários ao mudar de turma
-            
+            document.getElementById('area-horarios').classList.add('hidden');
+            const areaDatas = document.getElementById('area-datas');
+            const listaDatas = document.getElementById('lista-datas');
+            const msg = document.getElementById('msg-vazia');
+
             if(horariosTurmaSelecionada.length === 0) {
                 areaDatas.classList.add('hidden');
                 msg.classList.remove('hidden');
@@ -293,162 +306,97 @@
             msg.classList.add('hidden');
             areaDatas.classList.remove('hidden');
 
-            // Agrupa datas únicas
             const datasUnicas = [...new Set(horariosTurmaSelecionada.map(i => i.data))].sort();
-            
             listaDatas.innerHTML = "";
             datasUnicas.forEach(dataIso => {
-                const dataBr = dataIso.split('-').reverse().join('/');
-                // Extrai dia e mes para exibir bonito (Ex: 12/10)
-                const partes = dataBr.split('/');
-                const textoData = `${partes[0]}/${partes[1]}`;
-
+                const partes = dataIso.split('-').reverse().join('/').split('/');
                 const btn = document.createElement('button');
                 btn.className = "px-6 py-3 bg-white border-2 border-slate-200 rounded-xl font-bold text-slate-600 hover:border-blue-400 hover:text-blue-600 transition flex flex-col items-center min-w-[100px]";
-                btn.innerHTML = `<span class="text-lg">${textoData}</span><span class="text-[10px] text-slate-400 font-normal">Ver horários</span>`;
+                btn.innerHTML = `<span class="text-lg">${partes[0]}/${partes[1]}</span><span class="text-[10px] text-slate-400 font-normal">Ver horários</span>`;
                 btn.onclick = () => carregarHorariosDaData(dataIso, btn);
                 listaDatas.appendChild(btn);
             });
         };
 
         window.carregarHorariosDaData = (dataIso, btnElement) => {
-            // UI Feedback
             document.querySelectorAll('#lista-datas button').forEach(b => b.className = b.className.replace('data-ativa', ''));
             btnElement.classList.add('data-ativa');
 
-            const areaHorarios = document.getElementById('area-horarios');
             const grid = document.getElementById('grid-horarios');
-            
-            areaHorarios.classList.remove('hidden');
+            document.getElementById('area-horarios').classList.remove('hidden');
             grid.innerHTML = "";
 
-            const horariosDoDia = horariosTurmaSelecionada.filter(i => i.data === dataIso);
-            
-            horariosDoDia.forEach(item => {
+            horariosTurmaSelecionada.filter(i => i.data === dataIso).forEach(item => {
                 grid.innerHTML += `
                     <button onclick="reservarComDoisCampos('${item.id}', '${item.horario}', '${item.data}')" 
                         class="bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 font-bold py-3 px-4 rounded-xl border border-blue-100 transition shadow-sm flex justify-center items-center gap-2 group">
                         <i class="far fa-clock text-blue-300 group-hover:text-white"></i>
                         ${item.horario}
-                    </button>
-                `;
+                    </button>`;
             });
         };
 
-        // 4. NOVA RESERVA (DOIS CAMPOS)
         window.reservarComDoisCampos = async (id, hora, dataIso) => {
             const dataBr = dataIso.split('-').reverse().join('/');
-            
             const { value: formValues } = await Swal.fire({
                 title: 'Confirmar Reserva',
-                html: `
-                    <div class="mb-4 text-sm text-slate-500">Agendando para <b>${dataBr}</b> às <b>${hora}</b></div>
-                    <div class="text-left">
-                        <label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Responsável</label>
-                        <input id="swal-responsavel" class="swal2-input !m-0 !mb-3 w-full" placeholder="Ex: Maria Silva">
-                        
-                        <label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Aluno(a)</label>
-                        <input id="swal-aluno" class="swal2-input !m-0 w-full" placeholder="Ex: Joãozinho">
-                    </div>
-                `,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonColor: '#2563eb',
-                confirmButtonText: 'Confirmar Agendamento',
+                html: `<div class="mb-4 text-sm text-slate-500">Agendando para <b>${dataBr}</b> às <b>${hora}</b></div>
+                       <div class="text-left"><label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Responsável</label><input id="swal-responsavel" class="swal2-input !m-0 !mb-3 w-full">
+                       <label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Aluno(a)</label><input id="swal-aluno" class="swal2-input !m-0 w-full"></div>`,
+                focusConfirm: false, showCancelButton: true, confirmButtonColor: '#2563eb',
                 preConfirm: () => {
-                    const resp = document.getElementById('swal-responsavel').value;
-                    const aluno = document.getElementById('swal-aluno').value;
-                    if (!resp || !aluno) {
-                        Swal.showValidationMessage('Por favor, preencha os dois nomes');
-                    }
-                    return { resp, aluno };
+                    const r = document.getElementById('swal-responsavel').value;
+                    const a = document.getElementById('swal-aluno').value;
+                    if (!r || !a) Swal.showValidationMessage('Preencha os dois nomes');
+                    return { r, a };
                 }
             });
 
             if (formValues) {
                 try {
-                    // Formata a string para salvar no banco mantendo compatibilidade
-                    const nomeCompleto = `${formValues.resp} (Aluno: ${formValues.aluno})`;
-                    
-                    await updateDoc(doc(db, "agendamentos", id), { 
-                        disponivel: false, 
-                        pai: nomeCompleto 
-                    });
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Agendado!',
-                        text: `Horário confirmado para ${formValues.aluno}.`,
-                        confirmButtonColor: '#2563eb'
-                    });
-                    
-                    // Limpa seleção visual
+                    await updateDoc(doc(db, "agendamentos", id), { disponivel: false, pai: `${formValues.r} (Aluno: ${formValues.a})` });
+                    Swal.fire('Agendado!', `Confirmado para ${formValues.a}.`, 'success');
                     document.getElementById('area-horarios').classList.add('hidden');
                     document.getElementById('area-datas').classList.add('hidden');
                     document.getElementById('filtro-turma-pais').value = "";
-                    
-                } catch(e) { 
-                    Swal.fire('Erro', 'Este horário acabou de ser reservado por outra pessoa.', 'error'); 
-                }
+                } catch(e) { Swal.fire('Erro', 'Horário indisponível.', 'error'); }
             }
         };
 
-        // 5. FUNÇÕES ADMIN (MANTEVE AS MESMAS)
-        window.gerarAutomatico = async () => { /* ...Código Gerar Mantido... */ 
-             const turma = document.getElementById('gen-turma').value;
-            const data = document.getElementById('gen-data').value;
-            const inicio = document.getElementById('gen-inicio').value;
-            const fim = document.getElementById('gen-fim').value;
-            const duracao = parseInt(document.getElementById('gen-duracao').value);
+        // ADMIN FUNÇÕES
+        window.gerarAutomatico = async () => {
+            const t = document.getElementById('gen-turma').value;
+            const d = document.getElementById('gen-data').value;
+            const i = document.getElementById('gen-inicio').value;
+            const f = document.getElementById('gen-fim').value;
+            const dur = parseInt(document.getElementById('gen-duracao').value);
 
-            if (!turma || !data || !inicio || !fim || !duracao) return Swal.fire('Atenção', 'Preencha tudo.', 'warning');
+            if (!t || !d || !i || !f || !dur) return Swal.fire('Erro', 'Preencha tudo.', 'warning');
             
-            const [hIni, mIni] = inicio.split(':').map(Number);
-            const [hFim, mFim] = fim.split(':').map(Number);
-            
-            let minutoAtual = hIni * 60 + mIni;
-            const minutoFim = hFim * 60 + mFim;
-            const novosHorarios = [];
+            const [hIni, mIni] = i.split(':').map(Number);
+            const [hFim, mFim] = f.split(':').map(Number);
+            let mAtual = hIni * 60 + mIni, mFimCalc = hFim * 60 + mFim, novos = [];
 
-            while (minutoAtual + duracao <= minutoFim + (duracao - 1)) {
-                if (minutoAtual >= minutoFim) break;
-                const h = Math.floor(minutoAtual / 60);
-                const m = minutoAtual % 60;
-                const horaFormatada = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-                novosHorarios.push({
-                    turma: turma, data: data, horario: horaFormatada, disponivel: true, pai: "", timestamp: new Date(`${data}T${horaFormatada}`)
-                });
-                minutoAtual += duracao;
+            while (mAtual + dur <= mFimCalc + (dur - 1)) {
+                if (mAtual >= mFimCalc) break;
+                const h = Math.floor(mAtual / 60), m = mAtual % 60;
+                const hF = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+                novos.push({ turma: t, data: d, horario: hF, disponivel: true, pai: "", timestamp: new Date(`${d}T${hF}`) });
+                mAtual += dur;
             }
-            if (novosHorarios.length === 0) return Swal.fire('Ops', 'Intervalo inválido.', 'info');
-            if((await Swal.fire({ title: `Criar ${novosHorarios.length} horários?`, showCancelButton: true })).isConfirmed) {
-                await salvarEmLotes(novosHorarios);
+            if (novos.length > 0 && (await Swal.fire({ title: `Criar ${novos.length} horários?`, showCancelButton: true })).isConfirmed) {
+                const batch = writeBatch(db);
+                novos.forEach(x => batch.set(doc(collection(db, "agendamentos")), x));
+                await batch.commit();
+                Swal.fire('Sucesso!');
             }
         };
-
-        async function salvarEmLotes(lista) {
-            Swal.fire({ title: 'Salvando...', didOpen: () => Swal.showLoading() });
-            const batch = writeBatch(db); 
-            // Simplificado para demonstração (em prod usar chunks de 400)
-            lista.forEach(d => batch.set(doc(collection(db, "agendamentos")), d));
-            await batch.commit();
-            Swal.fire('Sucesso!', 'Horários criados', 'success');
-        }
 
         window.renderAdminTable = () => {
             const tbody = document.getElementById('tabela-admin');
             tbody.innerHTML = "";
-            let dadosView = todosDados.length > 100 ? todosDados.slice(-100).reverse() : [...todosDados].reverse();
-            dadosView.forEach(item => {
-                const dataBr = item.data.split('-').reverse().join('/');
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-50 hover:bg-slate-50">
-                        <td class="p-3 font-bold text-slate-700">${item.turma}</td>
-                        <td class="p-3 text-xs font-mono text-slate-500">${dataBr} ${item.horario}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${item.disponivel?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${item.disponivel?'LIVRE':'OCUPADO'}</span></td>
-                        <td class="p-3 text-xs text-slate-600 truncate max-w-[150px]">${item.pai || '-'}</td>
-                        <td class="p-3 text-center"><button onclick="deletar('${item.id}')" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button></td>
-                    </tr>`;
+            (todosDados.length > 100 ? todosDados.slice(-100).reverse() : [...todosDados].reverse()).forEach(i => {
+                tbody.innerHTML += `<tr class="border-b border-slate-50 hover:bg-slate-50"><td class="p-3 font-bold text-slate-700">${i.turma}</td><td class="p-3 text-xs font-mono text-slate-500">${i.data.split('-').reverse().join('/')} ${i.horario}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${i.disponivel?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${i.disponivel?'LIVRE':'OCUPADO'}</span></td><td class="p-3 text-xs text-slate-600 truncate max-w-[150px]">${i.pai || '-'}</td><td class="p-3 text-center"><button onclick="deletar('${i.id}')" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         };
 
@@ -456,21 +404,36 @@
         
         window.limparTudo = async () => {
             if((await Swal.fire({title:'Apagar TUDO?', text:"Digite APAGAR", input:'text', showCancelButton:true})).value === 'APAGAR') {
-                const snapshot = await getDocs(colRef);
+                const s = await getDocs(colRef);
                 const batch = writeBatch(db);
-                snapshot.docs.forEach(d => batch.delete(d.ref));
+                s.docs.forEach(d => batch.delete(d.ref));
                 await batch.commit();
-                Swal.fire('Limpo!', '', 'success');
+                Swal.fire('Limpo!');
             }
         };
 
-        window.imprimirRelatorio = () => {
-             // Atualizado para usar o novo formato de nome
-            const agendados = todosDados.filter(item => !item.disponivel && item.pai);
-            if(agendados.length === 0) return Swal.fire('Vazio', 'Nada agendado.', 'info');
+        // IMPRESSÃO INTELIGENTE
+        window.imprimirSelecionado = () => {
+            const turma = document.getElementById('select-impressao').value;
+            if(!turma) return Swal.fire('Atenção', 'Selecione uma turma na lista para imprimir.', 'warning');
+            imprimirRelatorio(turma);
+        }
+
+        window.imprimirRelatorio = (turmaEspecifica = null) => {
+            // Filtra agendados
+            let dadosImpressao = todosDados.filter(item => !item.disponivel && item.pai);
             
+            // Se foi pedido uma turma específica, filtra mais ainda
+            if(turmaEspecifica) {
+                dadosImpressao = dadosImpressao.filter(item => item.turma === turmaEspecifica);
+            }
+
+            if(dadosImpressao.length === 0) {
+                return Swal.fire('Atenção', turmaEspecifica ? `Nenhum agendamento encontrado para a turma ${turmaEspecifica}.` : 'Nenhum agendamento no sistema.', 'info');
+            }
+
             const porTurma = {};
-            agendados.forEach(item => { if(!porTurma[item.turma]) porTurma[item.turma]=[]; porTurma[item.turma].push(item); });
+            dadosImpressao.forEach(item => { if(!porTurma[item.turma]) porTurma[item.turma]=[]; porTurma[item.turma].push(item); });
 
             let html = `<div style="font-family:sans-serif;max-width:800px;margin:0 auto;text-align:center;padding-top:20px;">
                         <h1 style="margin-bottom:5px">Relatório de Agendamentos</h1>
@@ -482,14 +445,14 @@
                             <h2 style="background:#f3f4f6;padding:8px 15px;margin:0;font-size:16px;border-left:4px solid #2563eb;">${turma}</h2>
                             <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;">
                                 <thead><tr style="border-bottom:2px solid #e5e7eb;text-align:left;color:#4b5563">
-                                    <th style="padding:8px;">DATA/HORA</th>
+                                    <th style="padding:8px;width:120px">DATA/HORA</th>
                                     <th style="padding:8px;">RESPONSÁVEL / ALUNO</th>
                                 </tr></thead>
                                 <tbody>`;
                 lista.forEach(i => {
                     const d = i.data.split('-').reverse().join('/');
                     html += `<tr style="border-bottom:1px solid #f3f4f6;">
-                                <td style="padding:8px;white-space:nowrap;">${d} - <b>${i.horario}</b></td>
+                                <td style="padding:8px;">${d} - <b>${i.horario}</b></td>
                                 <td style="padding:8px;">${i.pai}</td>
                              </tr>`;
                 });
@@ -501,21 +464,19 @@
             setTimeout(() => { win.print(); win.close(); }, 500);
         };
 
-        window.processarExcel = async () => { /* ...Código Excel Mantido... */
-             const f = document.getElementById('input-excel').files[0];
+        window.processarExcel = async () => { /* Excel Mantido */
+            const f = document.getElementById('input-excel').files[0];
             if(!f) return;
             const r = new FileReader();
             r.onload = async (e) => {
                 const wb = XLSX.read(e.target.result, {type:'array'});
                 const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {raw:false});
-                const save = [];
-                json.forEach(row => {
-                    const k = Object.keys(row);
-                    const t = row[k.find(x=>x.match(/turma/i))], d = row[k.find(x=>x.match(/data/i))], h = row[k.find(x=>x.match(/hora/i))];
-                    if(t&&d&&h) save.push({turma:t, data:d.includes('/')?d.split('/').reverse().join('-'):d, horario:h, disponivel:true, pai:"", timestamp: new Date()});
-                });
                 const batch = writeBatch(db);
-                save.forEach(d => batch.set(doc(collection(db, "agendamentos")), d));
+                json.forEach(row => {
+                     const k = Object.keys(row);
+                    const t = row[k.find(x=>x.match(/turma/i))], d = row[k.find(x=>x.match(/data/i))], h = row[k.find(x=>x.match(/hora/i))];
+                    if(t&&d&&h) batch.set(doc(collection(db, "agendamentos")), {turma:t, data:d.includes('/')?d.split('/').reverse().join('-'):d, horario:h, disponivel:true, pai:"", timestamp: new Date()});
+                });
                 await batch.commit();
                 Swal.fire('Importado!');
             };
