@@ -3,72 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Reuniões | Escola Casa de Criança</title>
+    <title>Portal de Agendamento Escolar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800">
 
-    <header class="bg-indigo-700 text-white shadow-xl">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <i class="fas fa-graduation-cap text-3xl"></i>
-                <h1 class="text-2xl font-bold tracking-tight">Escola Casa de Criança</h1>
+                <div class="bg-white text-blue-900 p-2 rounded-lg">
+                    <i class="fas fa-school text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">Agendamento Escolar</h1>
+                    <p class="text-xs text-blue-200">Reunião de Pais e Mestres</p>
+                </div>
             </div>
             <nav class="flex gap-2">
-                <button onclick="showPanel('pais')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition">Pais</button>
-                <button onclick="showPanel('admin')" class="px-4 py-2 bg-indigo-800 hover:bg-indigo-900 rounded-lg transition border border-indigo-400/30">Admin</button>
-            </div>
+                <button onclick="switchView('pais')" id="btn-pais" class="px-4 py-2 bg-blue-700/50 hover:bg-blue-700 rounded-lg transition text-sm font-medium border border-transparent focus:border-blue-400">
+                    <i class="fas fa-users mr-2"></i>Área dos Pais
+                </button>
+                <button onclick="switchView('admin')" id="btn-admin" class="px-4 py-2 hover:bg-blue-800 rounded-lg transition text-sm font-medium opacity-80 hover:opacity-100">
+                    <i class="fas fa-lock mr-2"></i>Gestão
+                </button>
+            </nav>
         </div>
     </header>
 
-    <main class="container mx-auto mt-8 p-4 mb-20">
+    <main class="container mx-auto mt-8 p-4 mb-20 max-w-5xl">
         
-        <section id="panel-pais" class="block space-y-6">
-            <div class="text-center max-w-2xl mx-auto">
-                <h2 class="text-3xl font-extrabold text-indigo-900">Agendamento de Reuniões</h2>
-                <p class="text-slate-600 mt-2">Escolha uma data e horário abaixo para conversar com os professores.</p>
-            </div>
+        <section id="view-pais" class="block animate-fade-in">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lista-horarios">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center mb-8">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Selecione a Turma do Aluno</h2>
+                <p class="text-slate-500 mb-6">Os horários variam de acordo com a turma.</p>
+                
+                <div class="relative max-w-md mx-auto">
+                    <select id="filtro-turma-pais" onchange="carregarHorariosPais()" class="w-full p-4 pl-12 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-600 focus:ring-0 outline-none appearance-none bg-white cursor-pointer hover:border-blue-400 transition">
+                        <option value="" disabled selected>Clique para escolher a turma...</option>
+                        <option value="Jardim I">🧸 Jardim I</option>
+                        <option value="Jardim II">🎨 Jardim II</option>
+                        <option value="1º Ano A">📚 1º Ano A</option>
+                        <option value="1º Ano B">📚 1º Ano B</option>
+                        <option value="2º Ano">📐 2º Ano</option>
+                        <option value="3º Ano">🌍 3º Ano</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-4 top-5 text-slate-400 pointer-events-none"></i>
+                    <i class="fas fa-chalkboard-user absolute left-4 top-5 text-blue-600 pointer-events-none text-xl"></i>
                 </div>
+            </div>
+
+            <div id="container-horarios" class="hidden">
+                <h3 class="text-xl font-bold text-slate-700 mb-4 flex items-center gap-2">
+                    <i class="far fa-clock"></i> Horários Disponíveis
+                </h3>
+                
+                <div id="loading-msg" class="text-center py-10 hidden">
+                    <i class="fas fa-circle-notch fa-spin text-3xl text-blue-600"></i>
+                    <p class="mt-2 text-slate-500">Buscando disponibilidade...</p>
+                </div>
+
+                <div id="lista-vazia" class="hidden text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                    <i class="far fa-calendar-times text-4xl text-slate-300 mb-3"></i>
+                    <p class="text-slate-500">Nenhum horário disponível para esta turma no momento.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-horarios">
+                    </div>
+            </div>
         </section>
 
-        <section id="panel-admin" class="hidden space-y-8">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-indigo-900">
-                    <i class="fas fa-calendar-plus"></i> Abrir Novos Horários
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Data</label>
-                        <input type="date" id="new-date" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Horário</label>
-                        <input type="time" id="new-time" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="addTime()" class="w-full bg-green-600 text-white font-bold py-2.5 rounded-lg hover:bg-green-700 transition shadow-md">
-                            Criar Slot
-                        </button>
+        <section id="view-admin" class="hidden">
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-24">
+                        <h3 class="text-lg font-bold mb-4 text-blue-900 border-b pb-2">Novo Horário</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 mb-1">Turma</label>
+                                <select id="admin-turma" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
+                                    <option value="Jardim I">Jardim I</option>
+                                    <option value="Jardim II">Jardim II</option>
+                                    <option value="1º Ano A">1º Ano A</option>
+                                    <option value="1º Ano B">1º Ano B</option>
+                                    <option value="2º Ano">2º Ano</option>
+                                    <option value="3º Ano">3º Ano</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 mb-1">Data</label>
+                                <input type="date" id="admin-data" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 mb-1">Hora</label>
+                                <input type="time" id="admin-hora" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+
+                            <button onclick="adicionarHorario()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                                <i class="fas fa-plus mr-2"></i> Criar Agendamento
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-100 border-b border-slate-200">
-                        <tr>
-                            <th class="p-4 font-semibold">Data e Hora</th>
-                            <th class="p-4 font-semibold">Status</th>
-                            <th class="p-4 font-semibold">Pai/Responsável</th>
-                            <th class="p-4 font-semibold text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-table-body" class="divide-y divide-slate-100">
-                        </tbody>
-                </table>
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                            <h3 class="font-bold text-slate-700">Horários Criados</h3>
+                            <select id="filtro-admin-turma" onchange="carregarTabelaAdmin()" class="text-sm border p-1 rounded">
+                                <option value="todas">Ver Todas as Turmas</option>
+                                <option value="Jardim I">Jardim I</option>
+                                <option value="Jardim II">Jardim II</option>
+                                <option value="1º Ano A">1º Ano A</option>
+                                <option value="1º Ano B">1º Ano B</option>
+                                <option value="2º Ano">2º Ano</option>
+                                <option value="3º Ano">3º Ano</option>
+                            </select>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+                                    <tr>
+                                        <th class="p-4">Turma</th>
+                                        <th class="p-4">Data/Hora</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4">Responsável</th>
+                                        <th class="p-4 text-center">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-admin" class="divide-y divide-slate-100">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -76,9 +151,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO DO SEU FIREBASE (Coloque seus dados aqui novamente)
+        // --- SEU CONFIG FIREBASE AQUI ---
         const firebaseConfig = {
             apiKey: "SUA_API_KEY",
             authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -92,105 +167,188 @@
         const db = getFirestore(app);
         const colRef = collection(db, "agendamentos");
 
-        // SENHA DO ADMIN (Troque aqui)
-        const ADMIN_PASSWORD = "123";
+        // --- VARIÁVEIS GLOBAIS ---
+        let todosAgendamentos = []; // Cache local para filtrar rápido
 
-        // TROCA DE PAINEL COM SENHA
-        window.showPanel = (panel) => {
-            if (panel === 'admin') {
-                const pass = prompt("Senha de acesso à administração:");
-                if (pass !== ADMIN_PASSWORD) return alert("Senha incorreta!");
-            }
-            document.getElementById('panel-pais').classList.toggle('hidden', panel !== 'pais');
-            document.getElementById('panel-admin').classList.toggle('hidden', panel !== 'admin');
-        };
-
-        // CRIAR NOVO HORÁRIO (COM DATA)
-        window.addTime = async () => {
-            const dateInput = document.getElementById('new-date').value;
-            const timeInput = document.getElementById('new-time').value;
-
-            if (dateInput && timeInput) {
-                await addDoc(colRef, {
-                    data: dateInput,
-                    horario: timeInput,
-                    disponivel: true,
-                    pai: "",
-                    timestamp: new Date(`${dateInput}T${timeInput}`)
-                });
-                alert("Novo horário disponível!");
-            } else {
-                alert("Preencha data e hora!");
-            }
-        };
-
-        // EXCLUIR HORÁRIO
-        window.deleteSlot = async (id) => {
-            if (confirm("Deseja mesmo remover este horário?")) {
-                await deleteDoc(doc(db, "agendamentos", id));
-            }
-        };
-
-        // ESCUTAR BANCO DE DADOS EM TEMPO REAL
+        // --- INICIALIZAÇÃO: Escutar TUDO e salvar em memória ---
         const q = query(colRef, orderBy("timestamp", "asc"));
+        
         onSnapshot(q, (snapshot) => {
-            const listaPais = document.getElementById('lista-horarios');
-            const tabelaAdmin = document.getElementById('admin-table-body');
+            todosAgendamentos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
-            listaPais.innerHTML = "";
-            tabelaAdmin.innerHTML = "";
-
-            snapshot.docs.forEach(docSnap => {
-                const item = docSnap.data();
-                const id = docSnap.id;
-                const dataFormatada = item.data.split('-').reverse().join('/');
-
-                // Painel Pais
-                if (item.disponivel) {
-                    listaPais.innerHTML += `
-                        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition border border-slate-100 flex flex-col items-center gap-4">
-                            <div class="bg-indigo-50 w-full text-center py-2 rounded-lg">
-                                <span class="text-sm font-bold text-indigo-600 uppercase tracking-widest">${dataFormatada}</span>
-                            </div>
-                            <span class="text-3xl font-black text-slate-800">${item.horario}</span>
-                            <button onclick="reservar('${id}')" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">
-                                Reservar Vaga
-                            </button>
-                        </div>`;
-                }
-
-                // Painel Admin
-                tabelaAdmin.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-4 font-medium">${dataFormatada} às ${item.horario}</td>
-                        <td class="p-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold ${item.disponivel ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
-                                ${item.disponivel ? 'LIVRE' : 'RESERVADO'}
-                            </span>
-                        </td>
-                        <td class="p-4 text-slate-600">${item.pai || '---'}</td>
-                        <td class="p-4 text-center">
-                            <button onclick="deleteSlot('${id}')" class="text-red-500 hover:text-red-700 p-2">
-                                <i class="fas fa-trash-can"></i>
-                            </button>
-                        </td>
-                    </tr>`;
-            });
+            // Atualiza a tela que estiver ativa no momento
+            const painelAtivo = document.getElementById('view-pais').classList.contains('hidden') ? 'admin' : 'pais';
+            if(painelAtivo === 'pais') carregarHorariosPais();
+            if(painelAtivo === 'admin') carregarTabelaAdmin();
         });
 
-        // RESERVA POR PAI
-        window.reservar = async (id) => {
-            const nome = prompt("Nome completo do aluno ou responsável:");
+        // --- FUNÇÕES PAIS ---
+        window.carregarHorariosPais = () => {
+            const turmaSelecionada = document.getElementById('filtro-turma-pais').value;
+            const container = document.getElementById('container-horarios');
+            const grid = document.getElementById('grid-horarios');
+            const msgVazia = document.getElementById('lista-vazia');
+
+            if (!turmaSelecionada) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            grid.innerHTML = "";
+            
+            // Filtrar apenas: Turma certa E Disponível
+            const horariosFiltrados = todosAgendamentos.filter(item => 
+                item.turma === turmaSelecionada && item.disponivel === true
+            );
+
+            if (horariosFiltrados.length === 0) {
+                msgVazia.classList.remove('hidden');
+            } else {
+                msgVazia.classList.add('hidden');
+                horariosFiltrados.forEach(item => {
+                    const dataFormatada = item.data.split('-').reverse().join('/');
+                    grid.innerHTML += `
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between h-full group">
+                            <div>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">${dataFormatada}</span>
+                                    <span class="text-slate-400 text-xs flex-1 text-right"><i class="far fa-clock"></i> 20 min</span>
+                                </div>
+                                <h4 class="text-2xl font-bold text-slate-800 mb-1">${item.horario}</h4>
+                                <p class="text-sm text-slate-500 mb-4">Reunião Individual</p>
+                            </div>
+                            <button onclick="reservar('${item.id}', '${item.horario}', '${dataFormatada}')" class="w-full bg-white text-blue-600 border border-blue-600 font-bold py-2 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition">
+                                Reservar
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+        };
+
+        window.reservar = async (id, hora, data) => {
+            const { value: nome } = await Swal.fire({
+                title: 'Confirme sua reserva',
+                text: `Para: ${data} às ${hora}`,
+                input: 'text',
+                inputLabel: 'Nome do Aluno/Responsável',
+                inputPlaceholder: 'Ex: Maria Silva (Mãe do João)',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Confirmar Agendamento',
+                inputValidator: (value) => {
+                    if (!value) return 'Você precisa escrever seu nome!'
+                }
+            });
+
             if (nome) {
                 const docRef = doc(db, "agendamentos", id);
                 await updateDoc(docRef, {
                     disponivel: false,
                     pai: nome
                 });
-                alert("Tudo pronto! Seu horário foi reservado.");
+                Swal.fire('Agendado!', `Seu horário das ${hora} foi confirmado.`, 'success');
             }
         };
+
+        // --- FUNÇÕES ADMIN ---
+        window.adicionarHorario = async () => {
+            const turma = document.getElementById('admin-turma').value;
+            const data = document.getElementById('admin-data').value;
+            const hora = document.getElementById('admin-hora').value;
+
+            if (turma && data && hora) {
+                try {
+                    await addDoc(colRef, {
+                        turma: turma,
+                        data: data,
+                        horario: hora,
+                        disponivel: true,
+                        pai: "",
+                        timestamp: new Date(`${data}T${hora}`)
+                    });
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Criado!',
+                        text: `${turma} - ${hora}`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } catch (e) {
+                    console.error(e);
+                    alert("Erro ao criar. Verifique o console.");
+                }
+            } else {
+                alert("Preencha todos os campos!");
+            }
+        };
+
+        window.carregarTabelaAdmin = () => {
+            const filtroAdmin = document.getElementById('filtro-admin-turma').value;
+            const tbody = document.getElementById('tabela-admin');
+            tbody.innerHTML = "";
+
+            const dadosParaMostrar = filtroAdmin === 'todas' 
+                ? todosAgendamentos 
+                : todosAgendamentos.filter(i => i.turma === filtroAdmin);
+
+            dadosParaMostrar.forEach(item => {
+                const dataFormatada = item.data.split('-').reverse().join('/');
+                const statusClass = item.disponivel 
+                    ? "bg-emerald-100 text-emerald-700 border-emerald-200" 
+                    : "bg-amber-100 text-amber-700 border-amber-200";
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                        <td class="p-4 font-medium text-blue-900">${item.turma}</td>
+                        <td class="p-4">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-slate-700">${item.horario}</span>
+                                <span class="text-xs text-slate-400">${dataFormatada}</span>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded text-xs font-bold border ${statusClass}">
+                                ${item.disponivel ? 'LIVRE' : 'OCUPADO'}
+                            </span>
+                        </td>
+                        <td class="p-4 text-sm text-slate-600 truncate max-w-[150px]" title="${item.pai}">
+                            ${item.pai || '-'}
+                        </td>
+                        <td class="p-4 text-center">
+                            <button onclick="excluirSlot('${item.id}')" class="text-slate-400 hover:text-red-500 transition p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        window.excluirSlot = async (id) => {
+            if (confirm("Tem certeza que deseja apagar este horário?")) {
+                await deleteDoc(doc(db, "agendamentos", id));
+            }
+        };
+
+        // --- SISTEMA DE ABAS (SIMPLES) ---
+        window.switchView = (view) => {
+            if (view === 'admin') {
+                const pass = prompt("Senha da Coordenação:");
+                if (pass !== "123") return alert("Senha incorreta");
+            }
+            
+            document.getElementById('view-pais').classList.toggle('hidden', view !== 'pais');
+            document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
+            
+            // Atualiza botões
+            document.getElementById('btn-pais').className = view === 'pais' ? "px-4 py-2 bg-blue-700/50 rounded-lg text-sm font-medium" : "px-4 py-2 hover:bg-blue-800 rounded-lg text-sm font-medium opacity-80";
+            
+            if(view === 'admin') carregarTabelaAdmin();
+        };
+
     </script>
 </body>
 </html>
-
