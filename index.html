@@ -3,141 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamento Escolar</title>
+    <title>Portal de Reuniões | Escola Viva</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-slate-50 font-sans text-slate-800">
 
-    <nav class="bg-blue-600 p-4 text-white shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">Escola Conectada</h1>
-            <div>
-                <button onclick="showPanel('pais')" class="px-4 py-2 hover:bg-blue-700 rounded">Área dos Pais</button>
-                <button onclick="showPanel('admin')" class="px-4 py-2 hover:bg-blue-700 rounded border-l border-blue-400">Administração</button>
+    <header class="bg-indigo-700 text-white shadow-xl">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-graduation-cap text-3xl"></i>
+                <h1 class="text-2xl font-bold tracking-tight">Escola Viva</h1>
+            </div>
+            <nav class="flex gap-2">
+                <button onclick="showPanel('pais')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition">Pais</button>
+                <button onclick="showPanel('admin')" class="px-4 py-2 bg-indigo-800 hover:bg-indigo-900 rounded-lg transition border border-indigo-400/30">Admin</button>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <div class="container mx-auto mt-10 p-4">
+    <main class="container mx-auto mt-8 p-4 mb-20">
         
-        <section id="panel-pais" class="block">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Agendar Reunião</h2>
-            <p class="mb-4 text-gray-600">Selecione um horário disponível abaixo:</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="lista-horarios">
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500 flex justify-between items-center">
-                    <div>
-                        <p class="text-lg font-bold">09:00 - 09:30</p>
-                        <p class="text-sm text-green-600 font-medium">Disponível</p>
-                    </div>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Reservar</button>
-                </div>
+        <section id="panel-pais" class="block space-y-6">
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-3xl font-extrabold text-indigo-900">Agendamento de Reuniões</h2>
+                <p class="text-slate-600 mt-2">Escolha uma data e horário abaixo para conversar com os professores.</p>
             </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lista-horarios">
+                </div>
         </section>
 
-        <section id="panel-admin" class="hidden">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Painel de Gestão</h2>
-            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h3 class="font-bold mb-4">Adicionar Novo Horário</h3>
-                <div class="flex gap-4">
-                    <input type="time" id="new-time" class="border p-2 rounded w-full">
-                    <button onclick="addTime()" class="bg-green-600 text-white px-6 py-2 rounded">Criar Slot</button>
+        <section id="panel-admin" class="hidden space-y-8">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-indigo-900">
+                    <i class="fas fa-calendar-plus"></i> Abrir Novos Horários
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Data</label>
+                        <input type="date" id="new-date" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Horário</label>
+                        <input type="time" id="new-time" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="addTime()" class="w-full bg-green-600 text-white font-bold py-2.5 rounded-lg hover:bg-green-700 transition shadow-md">
+                            Criar Slot
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="overflow-x-auto bg-white rounded-lg shadow">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <table class="w-full text-left">
-                    <thead class="bg-gray-200">
+                    <thead class="bg-slate-100 border-b border-slate-200">
                         <tr>
-                            <th class="p-4">Horário</th>
-                            <th class="p-4">Status</th>
-                            <th class="p-4">Pai/Responsável</th>
-                            <th class="p-4">Ações</th>
+                            <th class="p-4 font-semibold">Data e Hora</th>
+                            <th class="p-4 font-semibold">Status</th>
+                            <th class="p-4 font-semibold">Pai/Responsável</th>
+                            <th class="p-4 font-semibold text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="admin-table-body">
+                    <tbody id="admin-table-body" class="divide-y divide-slate-100">
                         </tbody>
                 </table>
             </div>
         </section>
 
-    </div>
+    </main>
 
     <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // COLE AQUI as suas configurações que você copiou do Passo 1
-  const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_PROJETO.firebaseapp.com",
-    projectId: "SEU_PROJETO",
-    storageBucket: "SEU_PROJETO.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
-  };
+        // CONFIGURAÇÃO DO SEU FIREBASE (Coloque seus dados aqui novamente)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
 
-  // Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const colRef = collection(db, "agendamentos");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const colRef = collection(db, "agendamentos");
 
-  // --- FUNÇÃO PARA O ADMIN ADICIONAR HORÁRIO ---
-  window.addTime = async () => {
-    const timeInput = document.getElementById('new-time').value;
-    if (timeInput) {
-      await addDoc(colRef, {
-        horario: timeInput,
-        disponivel: true,
-        pai: ""
-      });
-      alert("Horário adicionado!");
-    }
-  };
+        // SENHA DO ADMIN (Troque aqui)
+        const ADMIN_PASSWORD = "123";
 
-  // --- ESCUTAR O BANCO DE DADOS EM TEMPO REAL ---
-  onSnapshot(colRef, (snapshot) => {
-    const listaPais = document.getElementById('lista-horarios');
-    const tabelaAdmin = document.getElementById('admin-table-body');
-    
-    listaPais.innerHTML = "";
-    tabelaAdmin.innerHTML = "";
+        // TROCA DE PAINEL COM SENHA
+        window.showPanel = (panel) => {
+            if (panel === 'admin') {
+                const pass = prompt("Senha de acesso à administração:");
+                if (pass !== ADMIN_PASSWORD) return alert("Senha incorreta!");
+            }
+            document.getElementById('panel-pais').classList.toggle('hidden', panel !== 'pais');
+            document.getElementById('panel-admin').classList.toggle('hidden', panel !== 'admin');
+        };
 
-    snapshot.docs.forEach(docSnap => {
-      const data = docSnap.data();
-      const id = docSnap.id;
+        // CRIAR NOVO HORÁRIO (COM DATA)
+        window.addTime = async () => {
+            const dateInput = document.getElementById('new-date').value;
+            const timeInput = document.getElementById('new-time').value;
 
-      // Renderizar para os PAIS
-      if (data.disponivel) {
-        listaPais.innerHTML += `
-          <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500 flex justify-between items-center">
-            <p class="text-lg font-bold">${data.horario}</p>
-            <button onclick="reservar('${id}')" class="bg-blue-600 text-white px-4 py-2 rounded">Reservar</button>
-          </div>`;
-      }
+            if (dateInput && timeInput) {
+                await addDoc(colRef, {
+                    data: dateInput,
+                    horario: timeInput,
+                    disponivel: true,
+                    pai: "",
+                    timestamp: new Date(`${dateInput}T${timeInput}`)
+                });
+                alert("Novo horário disponível!");
+            } else {
+                alert("Preencha data e hora!");
+            }
+        };
 
-      // Renderizar para o ADMIN
-      tabelaAdmin.innerHTML += `
-        <tr class="border-b">
-          <td class="p-4">${data.horario}</td>
-          <td class="p-4">${data.disponivel ? 'Livre' : 'Reservado'}</td>
-          <td class="p-4">${data.pai || '-'}</td>
-        </tr>`;
-    });
-  });
+        // EXCLUIR HORÁRIO
+        window.deleteSlot = async (id) => {
+            if (confirm("Deseja mesmo remover este horário?")) {
+                await deleteDoc(doc(db, "agendamentos", id));
+            }
+        };
 
-  // --- FUNÇÃO PARA O PAI RESERVAR ---
-  window.reservar = async (id) => {
-    const nome = prompt("Digite seu nome completo:");
-    if (nome) {
-      const docRef = doc(db, "agendamentos", id);
-      await updateDoc(docRef, {
-        disponivel: false,
-        pai: nome
-      });
-      alert("Sucesso! Reunião marcada.");
-    }
-  };
-</script>
+        // ESCUTAR BANCO DE DADOS EM TEMPO REAL
+        const q = query(colRef, orderBy("timestamp", "asc"));
+        onSnapshot(q, (snapshot) => {
+            const listaPais = document.getElementById('lista-horarios');
+            const tabelaAdmin = document.getElementById('admin-table-body');
+            
+            listaPais.innerHTML = "";
+            tabelaAdmin.innerHTML = "";
+
+            snapshot.docs.forEach(docSnap => {
+                const item = docSnap.data();
+                const id = docSnap.id;
+                const dataFormatada = item.data.split('-').reverse().join('/');
+
+                // Painel Pais
+                if (item.disponivel) {
+                    listaPais.innerHTML += `
+                        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition border border-slate-100 flex flex-col items-center gap-4">
+                            <div class="bg-indigo-50 w-full text-center py-2 rounded-lg">
+                                <span class="text-sm font-bold text-indigo-600 uppercase tracking-widest">${dataFormatada}</span>
+                            </div>
+                            <span class="text-3xl font-black text-slate-800">${item.horario}</span>
+                            <button onclick="reservar('${id}')" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">
+                                Reservar Vaga
+                            </button>
+                        </div>`;
+                }
+
+                // Painel Admin
+                tabelaAdmin.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-medium">${dataFormatada} às ${item.horario}</td>
+                        <td class="p-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${item.disponivel ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
+                                ${item.disponivel ? 'LIVRE' : 'RESERVADO'}
+                            </span>
+                        </td>
+                        <td class="p-4 text-slate-600">${item.pai || '---'}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="deleteSlot('${id}')" class="text-red-500 hover:text-red-700 p-2">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+        });
+
+        // RESERVA POR PAI
+        window.reservar = async (id) => {
+            const nome = prompt("Nome completo do aluno ou responsável:");
+            if (nome) {
+                const docRef = doc(db, "agendamentos", id);
+                await updateDoc(docRef, {
+                    disponivel: false,
+                    pai: nome
+                });
+                alert("Tudo pronto! Seu horário foi reservado.");
+            }
+        };
+    </script>
 </body>
 </html>
