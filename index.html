@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <style>
         @media print {
@@ -96,7 +97,7 @@
                         <label class="block text-xs font-bold text-slate-500 mb-1">TURMA</label>
                         <select id="gen-turma" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                             <option value="" disabled selected>Selecione...</option>
-                            <optgroup label="Infantil 1"><option value="Infantil 1A">Infantil 1A</option><option value="Infantil 1B">Infantil 1B</option><option value="Infantil 1C">Infantil 1C</option><option value="Infantil 1D">Infantil 1D</option><option value="Infantil 1E">Infantil 1E</option><option value="Infantil 1F">Infantil 1F</option><option value="Infantil 1G">Infantil 1G</option></optgroup>
+                             <optgroup label="Infantil 1"><option value="Infantil 1A">Infantil 1A</option><option value="Infantil 1B">Infantil 1B</option><option value="Infantil 1C">Infantil 1C</option><option value="Infantil 1D">Infantil 1D</option><option value="Infantil 1E">Infantil 1E</option><option value="Infantil 1F">Infantil 1F</option><option value="Infantil 1G">Infantil 1G</option></optgroup>
                             <optgroup label="Infantil 2"><option value="Infantil 2A">Infantil 2A</option><option value="Infantil 2B">Infantil 2B</option><option value="Infantil 2C">Infantil 2C</option><option value="Infantil 2D">Infantil 2D</option><option value="Infantil 2E">Infantil 2E</option><option value="Infantil 2F">Infantil 2F</option><option value="Infantil 2G">Infantil 2G</option><option value="Infantil 2H">Infantil 2H</option><option value="Infantil 2I">Infantil 2I</option><option value="Infantil 2J">Infantil 2J</option></optgroup>
                             <optgroup label="Infantil 3"><option value="Infantil 3A">Infantil 3A</option><option value="Infantil 3B">Infantil 3B</option><option value="Infantil 3C">Infantil 3C</option><option value="Infantil 3D">Infantil 3D</option><option value="Infantil 3E">Infantil 3E</option><option value="Infantil 3F">Infantil 3F</option><option value="Infantil 3G">Infantil 3G</option><option value="Infantil 3H">Infantil 3H</option><option value="Infantil 3I">Infantil 3I</option><option value="Infantil 3J">Infantil 3J</option></optgroup>
                             <optgroup label="Infantil 4"><option value="Infantil 4A">Infantil 4A</option><option value="Infantil 4B">Infantil 4B</option><option value="Infantil 4C">Infantil 4C</option><option value="Infantil 4D">Infantil 4D</option><option value="Infantil 4E">Infantil 4E</option><option value="Infantil 4F">Infantil 4F</option><option value="Infantil 4G">Infantil 4G</option><option value="Infantil 4H">Infantil 4H</option><option value="Infantil 4I">Infantil 4I</option><option value="Infantil 4J">Infantil 4J</option></optgroup>
@@ -130,18 +131,15 @@
                 <div class="flex flex-col md:flex-row justify-between items-end gap-4">
                     <div class="w-full md:w-auto">
                         <h3 class="font-bold text-purple-900 text-lg mb-1"><i class="fas fa-print mr-2"></i>Centro de Impressão</h3>
-                        <p class="text-purple-600 text-sm mb-3">Selecione uma turma específica para imprimir ou imprima o relatório geral.</p>
-                        
                         <div class="flex gap-2 items-center">
                             <div class="relative w-full md:w-64">
                                 <select id="select-impressao" class="w-full p-2.5 pl-9 border border-purple-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-purple-500 outline-none">
                                     <option value="" disabled selected>Escolha a turma...</option>
-                                    </select>
+                                </select>
                                 <i class="fas fa-users absolute left-3 top-3 text-purple-400"></i>
                             </div>
                         </div>
                     </div>
-
                     <div class="flex gap-3 w-full md:w-auto">
                         <button onclick="imprimirSelecionado()" class="flex-1 md:flex-none bg-purple-700 hover:bg-purple-800 text-white font-bold py-2.5 px-6 rounded-lg shadow transition flex items-center justify-center gap-2">
                             <i class="fas fa-file-pdf"></i> Imprimir Turma
@@ -203,6 +201,19 @@
         const db = getFirestore(app);
         const colRef = collection(db, "agendamentos");
 
+        // ======================================================
+        // CONFIGURAÇÃO DO EMAILJS (CHAVES INSERIDAS)
+        // ======================================================
+        const EMAILJS_PUBLIC_KEY = "qdUpXCoZtUkCyXUsBCD7N"; 
+        const EMAILJS_SERVICE_ID = "service_dp5egap"; 
+        const EMAILJS_TEMPLATE_ID = "template_4eyd3qa"; 
+        
+        // Inicializa EmailJS
+        (function(){
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+        })();
+        // ======================================================
+
         let todosDados = [];
         let isAdmin = false;
         let horariosTurmaSelecionada = [];
@@ -235,12 +246,9 @@
             renderAdminTable();
             gerarQRCode();
             
-            // Popula o select de impressão clonando o do gerador para garantir as mesmas opções
             const selectGen = document.getElementById('gen-turma');
             const selectPrint = document.getElementById('select-impressao');
-            if(selectGen && selectPrint) {
-                selectPrint.innerHTML = '<option value="" disabled selected>Escolha a turma...</option>' + selectGen.innerHTML;
-            }
+            if(selectGen && selectPrint) selectPrint.innerHTML = '<option value="" disabled selected>Escolha a turma...</option>' + selectGen.innerHTML;
         }
 
         window.sairAdmin = () => {
@@ -328,7 +336,7 @@
 
             horariosTurmaSelecionada.filter(i => i.data === dataIso).forEach(item => {
                 grid.innerHTML += `
-                    <button onclick="reservarComDoisCampos('${item.id}', '${item.horario}', '${item.data}')" 
+                    <button onclick="reservarComEmail('${item.id}', '${item.horario}', '${item.data}', '${item.turma}')" 
                         class="bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 font-bold py-3 px-4 rounded-xl border border-blue-100 transition shadow-sm flex justify-center items-center gap-2 group">
                         <i class="far fa-clock text-blue-300 group-hover:text-white"></i>
                         ${item.horario}
@@ -336,47 +344,112 @@
             });
         };
 
-        window.reservarComDoisCampos = async (id, hora, dataIso) => {
+        // ============================================
+        //  RESERVA COM ENVIO DE EMAIL
+        // ============================================
+        window.reservarComEmail = async (id, hora, dataIso, turma) => {
             const dataBr = dataIso.split('-').reverse().join('/');
+            
+            // Pop-up agora pede o EMAIL também
             const { value: formValues } = await Swal.fire({
-                title: 'Confirmar Reserva',
-                html: `<div class="mb-4 text-sm text-slate-500">Agendando para <b>${dataBr}</b> às <b>${hora}</b></div>
-                       <div class="text-left"><label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Responsável</label><input id="swal-responsavel" class="swal2-input !m-0 !mb-3 w-full">
-                       <label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Aluno(a)</label><input id="swal-aluno" class="swal2-input !m-0 w-full"></div>`,
-                focusConfirm: false, showCancelButton: true, confirmButtonColor: '#2563eb',
+                title: 'Confirmar Agendamento',
+                html: `
+                    <div class="mb-4 text-sm text-slate-500">
+                        Agendando para <b>${dataBr}</b> às <b>${hora}</b>
+                    </div>
+                    <div class="text-left space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Responsável</label>
+                            <input id="swal-responsavel" class="w-full p-2 border rounded" placeholder="Nome Completo">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1 ml-1">Nome do Aluno(a)</label>
+                            <input id="swal-aluno" class="w-full p-2 border rounded" placeholder="Nome do Aluno">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1 ml-1">E-mail para Confirmação</label>
+                            <input id="swal-email" type="email" class="w-full p-2 border rounded" placeholder="exemplo@gmail.com">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: 'Confirmar',
                 preConfirm: () => {
                     const r = document.getElementById('swal-responsavel').value;
                     const a = document.getElementById('swal-aluno').value;
-                    if (!r || !a) Swal.showValidationMessage('Preencha os dois nomes');
-                    return { r, a };
+                    const e = document.getElementById('swal-email').value;
+                    if (!r || !a || !e) Swal.showValidationMessage('Preencha todos os campos!');
+                    if (!e.includes('@')) Swal.showValidationMessage('E-mail inválido!');
+                    return { r, a, e };
                 }
             });
 
             if (formValues) {
+                // Loading enquanto processa
+                Swal.fire({ 
+                    title: 'Processando...', 
+                    html: 'Salvando e enviando e-mail de confirmação.', 
+                    didOpen: () => Swal.showLoading(),
+                    allowOutsideClick: false
+                });
+
                 try {
-                    await updateDoc(doc(db, "agendamentos", id), { disponivel: false, pai: `${formValues.r} (Aluno: ${formValues.a})` });
-                    Swal.fire('Agendado!', `Confirmado para ${formValues.a}.`, 'success');
+                    // 1. Salva no Firebase
+                    await updateDoc(doc(db, "agendamentos", id), { 
+                        disponivel: false, 
+                        pai: `${formValues.r} (Aluno: ${formValues.a})` 
+                    });
+
+                    // 2. Envia o E-mail via EmailJS
+                    const emailParams = {
+                        responsavel: formValues.r,
+                        aluno: formValues.a,
+                        data: dataBr,
+                        horario: hora,
+                        turma: turma,
+                        to_email: formValues.e 
+                    };
+
+                    try {
+                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams);
+                        console.log("Email enviado com sucesso!");
+                    } catch (errEmail) {
+                        console.error("Erro no email:", errEmail);
+                        // Não mostramos erro para o usuário se o banco funcionou
+                    }
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Confirmado!',
+                        text: `Agendamento realizado. Um cartão de confirmação foi enviado para ${formValues.e}.`,
+                        confirmButtonColor: '#2563eb'
+                    });
+
+                    // Limpa tela
                     document.getElementById('area-horarios').classList.add('hidden');
                     document.getElementById('area-datas').classList.add('hidden');
                     document.getElementById('filtro-turma-pais').value = "";
-                } catch(e) { Swal.fire('Erro', 'Horário indisponível.', 'error'); }
+
+                } catch(e) { 
+                    console.error(e);
+                    Swal.fire('Erro', 'Este horário já foi ocupado ou houve um erro de conexão.', 'error'); 
+                }
             }
         };
 
-        // ADMIN FUNÇÕES
+        // ADMIN FUNÇÕES (Mantidas)
         window.gerarAutomatico = async () => {
-            const t = document.getElementById('gen-turma').value;
+             const t = document.getElementById('gen-turma').value;
             const d = document.getElementById('gen-data').value;
             const i = document.getElementById('gen-inicio').value;
             const f = document.getElementById('gen-fim').value;
             const dur = parseInt(document.getElementById('gen-duracao').value);
-
             if (!t || !d || !i || !f || !dur) return Swal.fire('Erro', 'Preencha tudo.', 'warning');
-            
             const [hIni, mIni] = i.split(':').map(Number);
             const [hFim, mFim] = f.split(':').map(Number);
             let mAtual = hIni * 60 + mIni, mFimCalc = hFim * 60 + mFim, novos = [];
-
             while (mAtual + dur <= mFimCalc + (dur - 1)) {
                 if (mAtual >= mFimCalc) break;
                 const h = Math.floor(mAtual / 60), m = mAtual % 60;
@@ -412,59 +485,34 @@
             }
         };
 
-        // IMPRESSÃO INTELIGENTE
         window.imprimirSelecionado = () => {
             const turma = document.getElementById('select-impressao').value;
-            if(!turma) return Swal.fire('Atenção', 'Selecione uma turma na lista para imprimir.', 'warning');
+            if(!turma) return Swal.fire('Atenção', 'Selecione uma turma.', 'warning');
             imprimirRelatorio(turma);
         }
 
         window.imprimirRelatorio = (turmaEspecifica = null) => {
-            // Filtra agendados
             let dadosImpressao = todosDados.filter(item => !item.disponivel && item.pai);
-            
-            // Se foi pedido uma turma específica, filtra mais ainda
-            if(turmaEspecifica) {
-                dadosImpressao = dadosImpressao.filter(item => item.turma === turmaEspecifica);
-            }
-
-            if(dadosImpressao.length === 0) {
-                return Swal.fire('Atenção', turmaEspecifica ? `Nenhum agendamento encontrado para a turma ${turmaEspecifica}.` : 'Nenhum agendamento no sistema.', 'info');
-            }
+            if(turmaEspecifica) dadosImpressao = dadosImpressao.filter(item => item.turma === turmaEspecifica);
+            if(dadosImpressao.length === 0) return Swal.fire('Vazio', 'Nada para imprimir.', 'info');
 
             const porTurma = {};
             dadosImpressao.forEach(item => { if(!porTurma[item.turma]) porTurma[item.turma]=[]; porTurma[item.turma].push(item); });
 
-            let html = `<div style="font-family:sans-serif;max-width:800px;margin:0 auto;text-align:center;padding-top:20px;">
-                        <h1 style="margin-bottom:5px">Relatório de Agendamentos</h1>
-                        <p style="color:#666;font-size:12px;margin-bottom:30px">${new Date().toLocaleDateString()} - Casa de Criança</p></div>`;
-            
+            let html = `<div style="font-family:sans-serif;max-width:800px;margin:0 auto;text-align:center;padding-top:20px;"><h1>Relatório</h1><p>${new Date().toLocaleDateString()}</p></div>`;
             Object.keys(porTurma).sort().forEach(turma => {
                 const lista = porTurma[turma].sort((a, b) => a.timestamp - b.timestamp);
-                html += `<div style="margin-bottom:30px;page-break-inside:avoid;">
-                            <h2 style="background:#f3f4f6;padding:8px 15px;margin:0;font-size:16px;border-left:4px solid #2563eb;">${turma}</h2>
-                            <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;">
-                                <thead><tr style="border-bottom:2px solid #e5e7eb;text-align:left;color:#4b5563">
-                                    <th style="padding:8px;width:120px">DATA/HORA</th>
-                                    <th style="padding:8px;">RESPONSÁVEL / ALUNO</th>
-                                </tr></thead>
-                                <tbody>`;
-                lista.forEach(i => {
-                    const d = i.data.split('-').reverse().join('/');
-                    html += `<tr style="border-bottom:1px solid #f3f4f6;">
-                                <td style="padding:8px;">${d} - <b>${i.horario}</b></td>
-                                <td style="padding:8px;">${i.pai}</td>
-                             </tr>`;
-                });
+                html += `<div style="margin-bottom:30px;page-break-inside:avoid;"><h2 style="background:#f3f4f6;padding:5px;">${turma}</h2><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #000;text-align:left"><th style="padding:5px">DATA/HORA</th><th style="padding:5px">RESPONSÁVEL</th></tr></thead><tbody>`;
+                lista.forEach(i => html += `<tr><td style="padding:5px">${i.data.split('-').reverse().join('/')} - <b>${i.horario}</b></td><td style="padding:5px">${i.pai}</td></tr>`);
                 html += `</tbody></table></div>`;
             });
 
             const win = window.open('','','width=800,height=600');
-            win.document.write('<html><head><title>Imprimir</title></head><body>'+html+'</body></html>');
+            win.document.write('<html><head><title>Print</title></head><body>'+html+'</body></html>');
             setTimeout(() => { win.print(); win.close(); }, 500);
         };
 
-        window.processarExcel = async () => { /* Excel Mantido */
+        window.processarExcel = async () => {
             const f = document.getElementById('input-excel').files[0];
             if(!f) return;
             const r = new FileReader();
