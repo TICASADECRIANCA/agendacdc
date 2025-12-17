@@ -4,38 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Casa de Criança - Agendamento</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #area-impressao, #area-impressao * { visibility: visible; }
+            #area-impressao { position: absolute; left: 0; top: 0; width: 100%; }
+            @page { margin: 2cm; }
+        }
+        /* Animação para feedback de clique no logo */
+        .click-anim { animation: pulse 0.2s; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800">
 
-    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
+    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50 print:hidden">
+        <div class="container mx-auto px-4 py-4 flex justify-center md:justify-between items-center relative">
+            <div id="logo-secret" class="flex items-center gap-3 cursor-pointer select-none transition" onclick="tentarAcessoAdmin()">
                 <i class="fas fa-shapes text-2xl text-yellow-400"></i>
                 <h1 class="text-xl font-bold">Casa de Criança</h1>
             </div>
-            <nav class="flex gap-2">
-                <button onclick="switchView('pais')" id="btn-pais" class="px-4 py-2 bg-blue-700/50 hover:bg-blue-700 rounded-lg transition text-sm font-medium">
-                    <i class="fas fa-users mr-2"></i>Pais
-                </button>
-                <button onclick="switchView('admin')" id="btn-admin" class="px-4 py-2 hover:bg-blue-800 rounded-lg transition text-sm font-medium opacity-80">
-                    <i class="fas fa-user-shield mr-2"></i>Admin
-                </button>
-            </nav>
+            
+            <button id="btn-sair-admin" onclick="sairAdmin()" class="hidden text-sm bg-red-500/80 hover:bg-red-600 px-3 py-1 rounded text-white transition">
+                <i class="fas fa-sign-out-alt mr-1"></i> Sair do Admin
+            </button>
         </div>
     </header>
 
-    <main class="container mx-auto mt-8 p-4 mb-20 max-w-6xl">
+    <main class="container mx-auto mt-8 p-4 mb-20 max-w-6xl print:hidden">
         
-        <section id="view-pais" class="block">
+        <section id="view-pais" class="block animate-fade-in">
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center mb-8">
+                <div class="inline-block p-3 rounded-full bg-blue-50 text-blue-600 mb-4">
+                    <i class="fas fa-calendar-check text-3xl"></i>
+                </div>
                 <h2 class="text-2xl font-bold text-slate-800 mb-2">Agendamento de Reuniões</h2>
-                <p class="text-slate-500 mb-4">Selecione a turma abaixo para ver os horários disponíveis.</p>
-                <div class="relative max-w-md mx-auto mt-4">
-                    <select id="filtro-turma-pais" onchange="carregarHorariosPais()" class="w-full p-4 pl-12 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-600 outline-none bg-white cursor-pointer hover:border-blue-400 transition">
+                <p class="text-slate-500 mb-6">Bem-vindo(a)! Selecione a turma do seu filho(a) abaixo para reservar um horário.</p>
+                
+                <div class="relative max-w-md mx-auto">
+                    <select id="filtro-turma-pais" onchange="carregarHorariosPais()" class="w-full p-4 pl-12 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-600 outline-none bg-white cursor-pointer hover:border-blue-400 transition shadow-sm">
                         <option value="" disabled selected>Carregando turmas...</option>
                     </select>
                     <i class="fas fa-chalkboard-user absolute left-4 top-5 text-blue-600 text-xl pointer-events-none"></i>
@@ -46,93 +60,52 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" id="grid-horarios"></div>
                 <div id="msg-vazia" class="hidden text-center text-slate-500 py-10 bg-slate-100 rounded-xl border border-slate-200">
                     <i class="fas fa-calendar-times text-4xl text-slate-300 mb-2 block"></i>
-                    Nenhum horário disponível para esta turma.
+                    Ops! Nenhum horário disponível para esta turma no momento.
                 </div>
             </div>
         </section>
 
         <section id="view-admin" class="hidden space-y-8">
             
+            <div class="bg-teal-50 border border-teal-200 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex-1">
+                    <h3 class="font-bold text-teal-900 text-lg flex items-center gap-2"><i class="fas fa-share-alt"></i> Compartilhar com os Pais</h3>
+                    <p class="text-teal-700 text-sm mt-1">Gere um QR Code para os pais acessarem a agenda sem ver o painel administrativo.</p>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="qrcode" class="bg-white p-2 rounded shadow-sm"></div>
+                    <p class="text-xs text-teal-600 font-mono" id="link-atual">Gerando link...</p>
+                </div>
+            </div>
+
             <div class="bg-white border-l-4 border-blue-600 p-6 rounded-2xl shadow-md">
                 <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-magic text-blue-600"></i> Gerador Automático de Horários
+                    <i class="fas fa-magic text-blue-600"></i> Gerador Automático
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                     
                     <div class="lg:col-span-1">
                         <label class="block text-sm font-bold text-slate-600 mb-1">Turma</label>
-                        <select id="gen-turma" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer">
+                        <select id="gen-turma" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                             <option value="" disabled selected>Selecione...</option>
-                            
                             <optgroup label="Infantil 1">
-                                <option value="Infantil 1A">Infantil 1A</option>
-                                <option value="Infantil 1B">Infantil 1B</option>
-                                <option value="Infantil 1C">Infantil 1C</option>
-                                <option value="Infantil 1D">Infantil 1D</option>
-                                <option value="Infantil 1E">Infantil 1E</option>
-                                <option value="Infantil 1F">Infantil 1F</option>
-                                <option value="Infantil 1G">Infantil 1G</option>
+                                <option value="Infantil 1A">Infantil 1A</option><option value="Infantil 1B">Infantil 1B</option><option value="Infantil 1C">Infantil 1C</option><option value="Infantil 1D">Infantil 1D</option><option value="Infantil 1E">Infantil 1E</option><option value="Infantil 1F">Infantil 1F</option><option value="Infantil 1G">Infantil 1G</option>
                             </optgroup>
-
                             <optgroup label="Infantil 2">
-                                <option value="Infantil 2A">Infantil 2A</option>
-                                <option value="Infantil 2B">Infantil 2B</option>
-                                <option value="Infantil 2C">Infantil 2C</option>
-                                <option value="Infantil 2D">Infantil 2D</option>
-                                <option value="Infantil 2E">Infantil 2E</option>
-                                <option value="Infantil 2F">Infantil 2F</option>
-                                <option value="Infantil 2G">Infantil 2G</option>
-                                <option value="Infantil 2H">Infantil 2H</option>
-                                <option value="Infantil 2I">Infantil 2I</option>
-                                <option value="Infantil 2J">Infantil 2J</option>
+                                <option value="Infantil 2A">Infantil 2A</option><option value="Infantil 2B">Infantil 2B</option><option value="Infantil 2C">Infantil 2C</option><option value="Infantil 2D">Infantil 2D</option><option value="Infantil 2E">Infantil 2E</option><option value="Infantil 2F">Infantil 2F</option><option value="Infantil 2G">Infantil 2G</option><option value="Infantil 2H">Infantil 2H</option><option value="Infantil 2I">Infantil 2I</option><option value="Infantil 2J">Infantil 2J</option>
                             </optgroup>
-
                             <optgroup label="Infantil 3">
-                                <option value="Infantil 3A">Infantil 3A</option>
-                                <option value="Infantil 3B">Infantil 3B</option>
-                                <option value="Infantil 3C">Infantil 3C</option>
-                                <option value="Infantil 3D">Infantil 3D</option>
-                                <option value="Infantil 3E">Infantil 3E</option>
-                                <option value="Infantil 3F">Infantil 3F</option>
-                                <option value="Infantil 3G">Infantil 3G</option>
-                                <option value="Infantil 3H">Infantil 3H</option>
-                                <option value="Infantil 3I">Infantil 3I</option>
-                                <option value="Infantil 3J">Infantil 3J</option>
+                                <option value="Infantil 3A">Infantil 3A</option><option value="Infantil 3B">Infantil 3B</option><option value="Infantil 3C">Infantil 3C</option><option value="Infantil 3D">Infantil 3D</option><option value="Infantil 3E">Infantil 3E</option><option value="Infantil 3F">Infantil 3F</option><option value="Infantil 3G">Infantil 3G</option><option value="Infantil 3H">Infantil 3H</option><option value="Infantil 3I">Infantil 3I</option><option value="Infantil 3J">Infantil 3J</option>
                             </optgroup>
-
                             <optgroup label="Infantil 4">
-                                <option value="Infantil 4A">Infantil 4A</option>
-                                <option value="Infantil 4B">Infantil 4B</option>
-                                <option value="Infantil 4C">Infantil 4C</option>
-                                <option value="Infantil 4D">Infantil 4D</option>
-                                <option value="Infantil 4E">Infantil 4E</option>
-                                <option value="Infantil 4F">Infantil 4F</option>
-                                <option value="Infantil 4G">Infantil 4G</option>
-                                <option value="Infantil 4H">Infantil 4H</option>
-                                <option value="Infantil 4I">Infantil 4I</option>
-                                <option value="Infantil 4J">Infantil 4J</option>
+                                <option value="Infantil 4A">Infantil 4A</option><option value="Infantil 4B">Infantil 4B</option><option value="Infantil 4C">Infantil 4C</option><option value="Infantil 4D">Infantil 4D</option><option value="Infantil 4E">Infantil 4E</option><option value="Infantil 4F">Infantil 4F</option><option value="Infantil 4G">Infantil 4G</option><option value="Infantil 4H">Infantil 4H</option><option value="Infantil 4I">Infantil 4I</option><option value="Infantil 4J">Infantil 4J</option>
                             </optgroup>
-
                             <optgroup label="Infantil 5">
-                                <option value="Infantil 5A">Infantil 5A</option>
-                                <option value="Infantil 5B">Infantil 5B</option>
-                                <option value="Infantil 5C">Infantil 5C</option>
-                                <option value="Infantil 5D">Infantil 5D</option>
-                                <option value="Infantil 5E">Infantil 5E</option>
-                                <option value="Infantil 5F">Infantil 5F</option>
-                                <option value="Infantil 5G">Infantil 5G</option>
-                                <option value="Infantil 5H">Infantil 5H</option>
-                                <option value="Infantil 5I">Infantil 5I</option>
+                                <option value="Infantil 5A">Infantil 5A</option><option value="Infantil 5B">Infantil 5B</option><option value="Infantil 5C">Infantil 5C</option><option value="Infantil 5D">Infantil 5D</option><option value="Infantil 5E">Infantil 5E</option><option value="Infantil 5F">Infantil 5F</option><option value="Infantil 5G">Infantil 5G</option><option value="Infantil 5H">Infantil 5H</option><option value="Infantil 5I">Infantil 5I</option>
                             </optgroup>
-
                             <optgroup label="1 Ano">
-                                <option value="1 Ano A">1 Ano A</option>
-                                <option value="1 Ano B">1 Ano B</option>
-                                <option value="1 Ano C">1 Ano C</option>
-                                <option value="1 Ano D">1 Ano D</option>
-                                <option value="1 Ano I">1 Ano I</option>
+                                <option value="1 Ano A">1 Ano A</option><option value="1 Ano B">1 Ano B</option><option value="1 Ano C">1 Ano C</option><option value="1 Ano D">1 Ano D</option><option value="1 Ano I">1 Ano I</option>
                             </optgroup>
-
                         </select>
                     </div>
 
@@ -158,16 +131,26 @@
 
                 <div class="mt-6 flex justify-end">
                     <button onclick="gerarAutomatico()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition flex items-center gap-2 transform hover:-translate-y-0.5">
-                        <i class="fas fa-bolt"></i> Gerar Horários Agora
+                        <i class="fas fa-bolt"></i> Gerar Horários
                     </button>
                 </div>
             </div>
 
+            <div class="flex justify-between items-center bg-purple-50 border border-purple-200 p-6 rounded-2xl shadow-sm">
+                <div>
+                    <h3 class="font-bold text-purple-900 text-lg"><i class="fas fa-print mr-2"></i>Relatórios de Agendamento</h3>
+                    <p class="text-purple-600 text-sm">Lista de presença organizada por turma.</p>
+                </div>
+                <button onclick="imprimirRelatorio()" class="bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-6 rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fas fa-file-pdf"></i> Imprimir
+                </button>
+            </div>
+
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b flex justify-between items-center bg-slate-50">
-                    <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-list"></i> Últimos Horários Criados</h3>
+                    <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-list"></i> Horários no Sistema</h3>
                     <button onclick="limparTudo()" class="text-red-600 text-xs font-bold hover:bg-red-100 px-3 py-1.5 rounded transition border border-red-200">
-                        <i class="fas fa-trash-alt mr-1"></i> APAGAR BANCO INTEIRO
+                        <i class="fas fa-trash-alt mr-1"></i> APAGAR TUDO
                     </button>
                 </div>
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
@@ -187,20 +170,22 @@
             </div>
             
              <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl opacity-90 hover:opacity-100 transition shadow-inner">
-                <h3 class="text-sm font-bold text-indigo-900 mb-3"><i class="fas fa-file-excel mr-2"></i>Alternativa: Importar Planilha (Excel)</h3>
+                <h3 class="text-sm font-bold text-indigo-900 mb-3"><i class="fas fa-file-excel mr-2"></i>Importar Excel</h3>
                 <div class="flex gap-4 items-center flex-wrap">
                     <input type="file" id="input-excel" accept=".xlsx" class="block w-full md:w-auto text-sm text-slate-500 file:bg-white file:text-indigo-700 file:py-2 file:px-4 file:rounded-full file:border-0 hover:file:bg-indigo-100 cursor-pointer shadow-sm"/>
-                    <button onclick="processarExcel()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-indigo-700 transition shadow-md">Importar Arquivo</button>
+                    <button onclick="processarExcel()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-indigo-700 transition shadow-md">Carregar</button>
                 </div>
             </div>
         </section>
     </main>
 
+    <div id="area-impressao" class="hidden bg-white p-8"></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO DO FIREBASE
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDBWADP0CJMbIg5dlU_F4U-LSUbZ_KGngo",
             authDomain: "agendacdc-7c58a.firebaseapp.com",
@@ -215,147 +200,107 @@
         const colRef = collection(db, "agendamentos");
 
         let todosDados = [];
+        let isAdmin = false;
 
-        // 1. MONITORAMENTO REAL-TIME
+        // 1. SISTEMA DE LOGIN "SECRETO"
+        let logoClicks = 0;
+        window.tentarAcessoAdmin = async () => {
+            logoClicks++;
+            // Feedback visual
+            const logo = document.getElementById('logo-secret');
+            logo.classList.add('click-anim');
+            setTimeout(() => logo.classList.remove('click-anim'), 200);
+
+            if(logoClicks >= 5) {
+                logoClicks = 0;
+                await logarAdmin();
+            }
+        };
+
+        async function logarAdmin() {
+            const { value: senha } = await Swal.fire({
+                title: 'Acesso Restrito',
+                text: 'Digite a senha do Administrador:',
+                input: 'password',
+                inputPlaceholder: 'Senha',
+                confirmButtonColor: '#1e3a8a',
+                showCancelButton: true
+            });
+
+            if (senha === '1992') {
+                ativarModoAdmin();
+            } else if (senha) {
+                Swal.fire('Erro', 'Senha incorreta.', 'error');
+            }
+        }
+
+        function ativarModoAdmin() {
+            isAdmin = true;
+            document.getElementById('view-pais').classList.add('hidden');
+            document.getElementById('view-admin').classList.remove('hidden');
+            document.getElementById('btn-sair-admin').classList.remove('hidden');
+            renderAdminTable();
+            gerarQRCode();
+            Swal.fire({ icon: 'success', title: 'Modo Admin Ativado', timer: 1500, showConfirmButton: false });
+        }
+
+        window.sairAdmin = () => {
+            isAdmin = false;
+            document.getElementById('view-admin').classList.add('hidden');
+            document.getElementById('btn-sair-admin').classList.add('hidden');
+            document.getElementById('view-pais').classList.remove('hidden');
+            // Limpa URL
+            const url = new URL(window.location);
+            url.searchParams.delete('modo');
+            window.history.pushState({}, '', url);
+        };
+
+        // Verifica URL ao carregar (para acesso direto via link)
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('modo') === 'admin') {
+                logarAdmin();
+            }
+            // Gera o QR Code inicial (sem o modo admin na URL)
+            gerarQRCode();
+        };
+
+        // 2. GERADOR DE QR CODE
+        function gerarQRCode() {
+            // Pega a URL limpa (sem parâmetros de admin) para os pais
+            const urlLimpa = window.location.href.split('?')[0]; 
+            
+            const divQR = document.getElementById("qrcode");
+            divQR.innerHTML = ""; // Limpa anterior
+            
+            new QRCode(divQR, {
+                text: urlLimpa,
+                width: 128,
+                height: 128,
+                colorDark : "#1e3a8a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            document.getElementById('link-atual').innerText = urlLimpa;
+        }
+
+
+        // 3. MONITORAMENTO REAL-TIME
         const q = query(colRef, orderBy("timestamp", "asc"));
-        
         onSnapshot(q, (snapshot) => {
             todosDados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             atualizarDropdownTurmas();
             
-            const isPais = !document.getElementById('view-pais').classList.contains('hidden');
-            if(isPais) carregarHorariosPais();
-            else renderAdminTable();
+            if(isAdmin) renderAdminTable();
+            else carregarHorariosPais();
         });
 
-        // 2. SISTEMA TURBO
-        async function salvarEmLotes(listaDeObjetos) {
-            const TAMANHO_LOTE = 400; 
-            const total = listaDeObjetos.length;
-            let processados = 0;
-
-            Swal.fire({
-                title: 'Processando...',
-                html: `Salvando <b>${total}</b> horários.<br>Por favor, aguarde.`,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            for (let i = 0; i < total; i += TAMANHO_LOTE) {
-                const loteAtual = listaDeObjetos.slice(i, i + TAMANHO_LOTE);
-                const batch = writeBatch(db);
-                loteAtual.forEach(dado => {
-                    const ref = doc(collection(db, "agendamentos"));
-                    batch.set(ref, dado);
-                });
-                await batch.commit();
-                processados += loteAtual.length;
-            }
-            Swal.fire({ icon: 'success', title: 'Sucesso!', text: `${processados} horários criados!`, confirmButtonColor: '#2563eb' });
-        }
-
-        // 3. GERADOR AUTOMÁTICO
-        window.gerarAutomatico = async () => {
-            const turma = document.getElementById('gen-turma').value;
-            const data = document.getElementById('gen-data').value;
-            const inicio = document.getElementById('gen-inicio').value;
-            const fim = document.getElementById('gen-fim').value;
-            const duracao = parseInt(document.getElementById('gen-duracao').value);
-
-            if (!turma || !data || !inicio || !fim || !duracao) return Swal.fire('Atenção', 'Preencha todos os campos.', 'warning');
-            
-            const [hIni, mIni] = inicio.split(':').map(Number);
-            const [hFim, mFim] = fim.split(':').map(Number);
-            
-            let minutoAtual = hIni * 60 + mIni;
-            const minutoFim = hFim * 60 + mFim;
-            const novosHorarios = [];
-
-            while (minutoAtual + duracao <= minutoFim + (duracao - 1)) {
-                if (minutoAtual >= minutoFim) break;
-                
-                const h = Math.floor(minutoAtual / 60);
-                const m = minutoAtual % 60;
-                const horaFormatada = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-
-                novosHorarios.push({
-                    turma: turma,
-                    data: data,
-                    horario: horaFormatada,
-                    disponivel: true,
-                    pai: "",
-                    timestamp: new Date(`${data}T${horaFormatada}`)
-                });
-                minutoAtual += duracao;
-            }
-
-            if (novosHorarios.length === 0) return Swal.fire('Ops', 'Intervalo muito curto.', 'info');
-
-            const confirm = await Swal.fire({
-                title: 'Confirmar?',
-                text: `Criar ${novosHorarios.length} horários para a turma ${turma}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Sim, criar!',
-                confirmButtonColor: '#2563eb'
-            });
-
-            if(confirm.isConfirmed) await salvarEmLotes(novosHorarios);
-        };
-
-        // 4. EXCEL
-        window.processarExcel = async () => {
-            const fileInput = document.getElementById('input-excel');
-            const file = fileInput.files[0];
-            if (!file) return Swal.fire('Erro', 'Selecione um arquivo .xlsx', 'error');
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { raw: false, dateNF: 'dd/mm/yyyy' });
-
-                    if(json.length === 0) return Swal.fire('Vazio', 'Planilha vazia.', 'warning');
-
-                    const listaParaSalvar = [];
-                    json.forEach(row => {
-                        const keys = Object.keys(row);
-                        const turma = row[keys.find(k => k.toLowerCase().includes('turma'))];
-                        const dataBr = row[keys.find(k => k.toLowerCase().includes('data'))];
-                        const hora = row[keys.find(k => k.toLowerCase().includes('hora'))];
-
-                        if(turma && dataBr && hora) {
-                            let dataIso = dataBr;
-                            if(dataBr.includes('/')) {
-                                const parts = dataBr.split('/');
-                                if(parts.length === 3) dataIso = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                            }
-                            listaParaSalvar.push({
-                                turma: String(turma).trim(),
-                                data: dataIso,
-                                horario: String(hora).trim(),
-                                disponivel: true,
-                                pai: "",
-                                timestamp: new Date(`${dataIso}T${hora}`)
-                            });
-                        }
-                    });
-                    if(listaParaSalvar.length === 0) return Swal.fire('Erro', 'Colunas não encontradas.', 'error');
-                    await salvarEmLotes(listaParaSalvar);
-                    fileInput.value = "";
-                } catch (err) { Swal.fire('Erro', 'Falha ao ler Excel.', 'error'); }
-            };
-            reader.readAsArrayBuffer(file);
-        };
-
-        // 5. INTERFACE
+        // 4. LÓGICA DE DADOS (Igual ao anterior)
         function atualizarDropdownTurmas() {
-            // Dropdown dos pais só mostra o que tem horário
             const turmasUnicas = [...new Set(todosDados.map(item => item.turma))].sort();
             const select = document.getElementById('filtro-turma-pais');
             const valorAtual = select.value;
-            let html = '<option value="" disabled selected>Clique para escolher sua turma...</option>';
+            let html = '<option value="" disabled selected>Escolha a turma...</option>';
             turmasUnicas.forEach(turma => html += `<option value="${turma}">${turma}</option>`);
             select.innerHTML = html;
             if(turmasUnicas.includes(valorAtual)) select.value = valorAtual;
@@ -379,13 +324,10 @@
                 filtrados.forEach(item => {
                     const dataBr = item.data.split('-').reverse().join('/');
                     grid.innerHTML += `
-                        <div class="bg-white border border-slate-200 p-4 rounded-xl hover:shadow-lg transition transform hover:-translate-y-1">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded">${dataBr}</span>
-                                <i class="fas fa-clock text-slate-300"></i>
-                            </div>
-                            <div class="text-3xl font-bold text-slate-800 mb-4 text-center">${item.horario}</div>
-                            <button onclick="reservar('${item.id}', '${item.horario}')" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 shadow-sm active:scale-95 transition">
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl hover:shadow-lg transition transform hover:-translate-y-1 text-center">
+                            <div class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2">${dataBr}</div>
+                            <div class="text-3xl font-bold text-slate-800 mb-4">${item.horario}</div>
+                            <button onclick="reservar('${item.id}', '${item.horario}')" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 shadow-sm transition">
                                 Reservar
                             </button>
                         </div>`;
@@ -393,85 +335,143 @@
             }
         };
 
-        window.renderAdminTable = () => {
-            const tbody = document.getElementById('tabela-admin');
-            tbody.innerHTML = "";
-            let dadosView = todosDados.length > 100 ? todosDados.slice(-100).reverse() : [...todosDados].reverse();
-
-            dadosView.forEach(item => {
-                const dataBr = item.data.split('-').reverse().join('/');
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                        <td class="p-3 font-medium text-slate-700">${item.turma}</td>
-                        <td class="p-3 text-slate-600 font-mono text-xs">${dataBr} - ${item.horario}</td>
-                        <td class="p-3">
-                            <span class="text-xs font-bold px-2 py-1 rounded ${item.disponivel ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                ${item.disponivel ? 'LIVRE' : 'OCUPADO'}
-                            </span>
-                        </td>
-                        <td class="p-3 text-slate-500 text-sm truncate max-w-[150px]">${item.pai || '-'}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="deletar('${item.id}')" class="text-slate-400 hover:text-red-600 transition p-2 rounded-full hover:bg-red-50"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            });
-            if(todosDados.length > 100) tbody.innerHTML += `<tr><td colspan="5" class="text-center text-xs text-slate-400 p-2">Exibindo os 100 últimos registros.</td></tr>`;
-        };
-
-        // 6. AÇÕES GERAIS
         window.reservar = async (id, hora) => {
             const { value: nome } = await Swal.fire({
-                title: 'Confirmar Reserva',
-                html: `Horário: <b>${hora}</b><br>Digite o nome do Responsável/Aluno:`,
+                title: 'Confirmar Agendamento',
+                html: `Horário: <b>${hora}</b><br>Digite o nome do Aluno/Responsável:`,
                 input: 'text',
                 showCancelButton: true,
                 confirmButtonColor: '#2563eb',
                 confirmButtonText: 'Confirmar',
-                inputValidator: (value) => { if(!value) return 'O nome é obrigatório!' }
+                inputValidator: (value) => { if(!value) return 'Nome obrigatório!' }
             });
 
             if (nome) {
                 try {
                     await updateDoc(doc(db, "agendamentos", id), { disponivel: false, pai: nome });
-                    Swal.fire('Sucesso!', `Horário agendado para <b>${nome}</b>.`, 'success');
-                } catch(e) { Swal.fire('Erro', 'Horário já reservado.', 'error'); }
+                    Swal.fire('Sucesso!', `Agendado para <b>${nome}</b>.`, 'success');
+                } catch(e) { Swal.fire('Erro', 'Este horário acabou de ser pego.', 'error'); }
             }
         };
 
-        window.deletar = async (id) => { if(confirm('Apagar horário?')) await deleteDoc(doc(db, "agendamentos", id)); };
+        // ADMIN FUNÇÕES
+        async function salvarEmLotes(listaDeObjetos) {
+            const TAMANHO_LOTE = 400; 
+            const total = listaDeObjetos.length;
+            let processados = 0;
+            Swal.fire({ title: 'Salvando...', didOpen: () => Swal.showLoading() });
 
+            for (let i = 0; i < total; i += TAMANHO_LOTE) {
+                const loteAtual = listaDeObjetos.slice(i, i + TAMANHO_LOTE);
+                const batch = writeBatch(db);
+                loteAtual.forEach(dado => {
+                    const ref = doc(collection(db, "agendamentos"));
+                    batch.set(ref, dado);
+                });
+                await batch.commit();
+                processados += loteAtual.length;
+            }
+            Swal.fire({ icon: 'success', title: 'Feito!', text: `${processados} horários criados.` });
+        }
+
+        window.gerarAutomatico = async () => {
+            const turma = document.getElementById('gen-turma').value;
+            const data = document.getElementById('gen-data').value;
+            const inicio = document.getElementById('gen-inicio').value;
+            const fim = document.getElementById('gen-fim').value;
+            const duracao = parseInt(document.getElementById('gen-duracao').value);
+
+            if (!turma || !data || !inicio || !fim || !duracao) return Swal.fire('Atenção', 'Preencha tudo.', 'warning');
+            
+            const [hIni, mIni] = inicio.split(':').map(Number);
+            const [hFim, mFim] = fim.split(':').map(Number);
+            
+            let minutoAtual = hIni * 60 + mIni;
+            const minutoFim = hFim * 60 + mFim;
+            const novosHorarios = [];
+
+            while (minutoAtual + duracao <= minutoFim + (duracao - 1)) {
+                if (minutoAtual >= minutoFim) break;
+                const h = Math.floor(minutoAtual / 60);
+                const m = minutoAtual % 60;
+                const horaFormatada = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                novosHorarios.push({
+                    turma: turma, data: data, horario: horaFormatada, disponivel: true, pai: "", timestamp: new Date(`${data}T${horaFormatada}`)
+                });
+                minutoAtual += duracao;
+            }
+            if (novosHorarios.length === 0) return Swal.fire('Ops', 'Intervalo inválido.', 'info');
+            if((await Swal.fire({ title: `Criar ${novosHorarios.length} horários?`, showCancelButton: true })).isConfirmed) {
+                await salvarEmLotes(novosHorarios);
+            }
+        };
+
+        window.renderAdminTable = () => {
+            const tbody = document.getElementById('tabela-admin');
+            tbody.innerHTML = "";
+            let dadosView = todosDados.length > 100 ? todosDados.slice(-100).reverse() : [...todosDados].reverse();
+            dadosView.forEach(item => {
+                const dataBr = item.data.split('-').reverse().join('/');
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                        <td class="p-3 font-medium text-slate-700">${item.turma}</td>
+                        <td class="p-3 text-xs text-slate-500 font-mono">${dataBr} - ${item.horario}</td>
+                        <td class="p-3"><span class="text-xs font-bold px-2 py-1 rounded ${item.disponivel ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${item.disponivel ? 'LIVRE' : 'OCUPADO'}</span></td>
+                        <td class="p-3 text-sm text-slate-600">${item.pai || '-'}</td>
+                        <td class="p-3 text-center"><button onclick="deletar('${item.id}')" class="text-slate-400 hover:text-red-600"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+            });
+        };
+
+        window.deletar = async (id) => { if(confirm('Apagar?')) await deleteDoc(doc(db, "agendamentos", id)); };
+        
         window.limparTudo = async () => {
-            const confirmacao = await Swal.fire({
-                title: 'ATENÇÃO MÁXIMA!',
-                text: "Digite 'DELETAR' para apagar TODOS os horários de TODAS as turmas:",
-                input: 'text',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626'
+            if((await Swal.fire({title:'Deseja apagar TUDO?', text:"Digite APAGAR para confirmar", input:'text', showCancelButton:true})).value === 'APAGAR') {
+                Swal.fire({ title: 'Apagando...', didOpen: () => Swal.showLoading() });
+                const snapshot = await getDocs(colRef);
+                const batch = writeBatch(db);
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                Swal.fire('Limpo!', '', 'success');
+            }
+        };
+
+        window.imprimirRelatorio = () => {
+            const agendados = todosDados.filter(item => !item.disponivel && item.pai);
+            if(agendados.length === 0) return Swal.fire('Vazio', 'Nada agendado.', 'info');
+            const porTurma = {};
+            agendados.forEach(item => { if(!porTurma[item.turma]) porTurma[item.turma]=[]; porTurma[item.turma].push(item); });
+
+            let html = `<div style="font-family:sans-serif;max-width:800px;margin:0 auto;text-align:center"><h1>Relatório de Agendamentos</h1><p>${new Date().toLocaleDateString()}</p></div>`;
+            Object.keys(porTurma).sort().forEach(turma => {
+                const lista = porTurma[turma].sort((a, b) => a.timestamp - b.timestamp);
+                html += `<div style="margin-top:30px;text-align:left"><h2 style="background:#eee;padding:5px;">${turma}</h2><table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:1px solid #000"><th style="text-align:left">Data/Hora</th><th style="text-align:left">Responsável</th></tr></thead><tbody>`;
+                lista.forEach(i => html += `<tr><td style="padding:5px;border-bottom:1px solid #ddd">${i.data.split('-').reverse().join('/')} - <b>${i.horario}</b></td><td style="padding:5px;border-bottom:1px solid #ddd">${i.pai.toUpperCase()}</td></tr>`);
+                html += `</tbody></table></div>`;
             });
 
-            if(confirmacao.value === 'DELETAR') {
-                Swal.fire({ title: 'Limpando...', didOpen: () => Swal.showLoading() });
-                const snapshot = await getDocs(colRef);
-                const total = snapshot.docs.length;
-                const batchSize = 400;
-                for(let i=0; i<total; i+=batchSize){
-                    const batch = writeBatch(db);
-                    snapshot.docs.slice(i, i+batchSize).forEach(doc => batch.delete(doc.ref));
-                    await batch.commit();
-                }
-                Swal.fire('Concluído', 'Banco limpo.', 'success');
-            }
+            const win = window.open('','','width=800,height=600');
+            win.document.write('<html><body>'+html+'</body></html>');
+            setTimeout(() => { win.print(); win.close(); }, 500);
         };
-
-        window.switchView = (view) => {
-            if(view === 'admin') {
-                const senha = prompt('Senha Admin:');
-                if(senha !== '1992') return Swal.fire('Erro', 'Senha incorreta.', 'error');
-            }
-            document.getElementById('view-pais').classList.toggle('hidden', view !== 'pais');
-            document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
-            if(view === 'admin') renderAdminTable();
+        
+        // Excel (Simplificado para caber)
+        window.processarExcel = async () => {
+            const f = document.getElementById('input-excel').files[0];
+            if(!f) return;
+            const r = new FileReader();
+            r.onload = async (e) => {
+                const wb = XLSX.read(e.target.result, {type:'array'});
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {raw:false});
+                const save = [];
+                json.forEach(row => {
+                    const k = Object.keys(row);
+                    const t = row[k.find(x=>x.match(/turma/i))], d = row[k.find(x=>x.match(/data/i))], h = row[k.find(x=>x.match(/hora/i))];
+                    if(t&&d&&h) save.push({turma:t, data:d.includes('/')?d.split('/').reverse().join('-'):d, horario:h, disponivel:true, pai:"", timestamp: new Date()});
+                });
+                await salvarEmLotes(save);
+            };
+            r.readAsArrayBuffer(f);
         }
     </script>
 </body>
