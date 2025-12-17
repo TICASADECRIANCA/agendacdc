@@ -15,7 +15,7 @@
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <i class="fas fa-school text-2xl"></i>
-                <h1 class="text-xl font-bold">Casa de Criança</h1>
+                <h1 class="text-xl font-bold">Portal Escolar</h1>
             </div>
             <nav class="flex gap-2">
                 <button onclick="switchView('pais')" id="btn-pais" class="px-4 py-2 bg-blue-700/50 hover:bg-blue-700 rounded-lg transition text-sm font-medium">
@@ -33,7 +33,6 @@
         <section id="view-pais" class="block">
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center mb-8">
                 <h2 class="text-2xl font-bold text-slate-800 mb-2">Selecione a Turma</h2>
-                
                 <div class="relative max-w-md mx-auto mt-4">
                     <select id="filtro-turma-pais" onchange="carregarHorariosPais()" class="w-full p-4 pl-12 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-600 outline-none bg-white cursor-pointer">
                         <option value="" disabled selected>Carregando turmas...</option>
@@ -43,32 +42,69 @@
             </div>
 
             <div id="container-horarios" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" id="grid-horarios">
-                    </div>
-                <div id="msg-vazia" class="hidden text-center text-slate-500 py-10">
-                    Nenhum horário disponível para esta turma.
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" id="grid-horarios"></div>
+                <div id="msg-vazia" class="hidden text-center text-slate-500 py-10">Nenhum horário disponível.</div>
             </div>
         </section>
 
         <section id="view-admin" class="hidden space-y-8">
             
-            <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl">
-                <h3 class="text-lg font-bold text-indigo-900 mb-2"><i class="fas fa-file-excel mr-2"></i>Importação em Massa</h3>
-                <p class="text-sm text-indigo-700 mb-4">Carregue um arquivo Excel (.xlsx) com as colunas: <b>Turma</b>, <b>Data</b> (DD/MM/AAAA) e <b>Hora</b> (HH:MM).</p>
-                
-                <div class="flex gap-4 items-center">
-                    <input type="file" id="input-excel" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"/>
-                    <button onclick="processarExcel()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-md whitespace-nowrap">
-                        Importar Agora
+            <div class="bg-white border-l-4 border-blue-600 p-6 rounded-2xl shadow-md">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-magic text-blue-600"></i> Gerador Automático de Horários
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                    
+                    <div class="lg:col-span-1">
+                        <label class="block text-sm font-bold text-slate-600 mb-1">Turma</label>
+                        <input list="lista-turmas-sugestao" id="gen-turma" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Infantil 1A">
+                        <datalist id="lista-turmas-sugestao">
+                            <option value="Infantil 1A">
+                            <option value="Infantil 1B">
+                            <option value="1 Ano A">
+                            <option value="1 Ano B">
+                            </datalist>
+                    </div>
+
+                    <div class="lg:col-span-1">
+                        <label class="block text-sm font-bold text-slate-600 mb-1">Data</label>
+                        <input type="date" id="gen-data" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-bold text-slate-600 mb-1">Intervalo (Início e Fim)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="time" id="gen-inicio" value="08:00" class="w-full border p-2.5 rounded-lg text-center">
+                            <span class="text-slate-400">até</span>
+                            <input type="time" id="gen-fim" value="11:00" class="w-full border p-2.5 rounded-lg text-center">
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-1 relative">
+                        <label class="block text-sm font-bold text-slate-600 mb-1">Duração (min)</label>
+                        <input type="number" id="gen-duracao" value="20" class="w-full border p-2.5 rounded-lg text-center font-bold text-blue-900">
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button onclick="gerarAutomatico()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition flex items-center gap-2">
+                        <i class="fas fa-cogs"></i> Gerar Horários
                     </button>
+                </div>
+            </div>
+
+            <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl opacity-80 hover:opacity-100 transition">
+                <h3 class="text-sm font-bold text-indigo-900 mb-2"><i class="fas fa-file-excel mr-2"></i>Ou importe via Excel</h3>
+                <div class="flex gap-4 items-center">
+                    <input type="file" id="input-excel" accept=".xlsx" class="block w-full text-sm text-slate-500 file:bg-white file:text-indigo-700 file:py-2 file:px-4 file:rounded-full file:border-0 hover:file:bg-indigo-100"/>
+                    <button onclick="processarExcel()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Importar</button>
                 </div>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200">
                 <div class="p-4 border-b flex justify-between items-center bg-slate-50">
                     <h3 class="font-bold">Gerenciar Horários</h3>
-                    <button onclick="limparTudo()" class="text-red-500 text-xs hover:underline">Apagar todos os horários</button>
+                    <button onclick="limparTudo()" class="text-red-500 text-xs hover:underline">Apagar TUDO</button>
                 </div>
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
                     <table class="w-full text-sm text-left">
@@ -77,7 +113,7 @@
                                 <th class="p-3">Turma</th>
                                 <th class="p-3">Data/Hora</th>
                                 <th class="p-3">Status</th>
-                                <th class="p-3">Pai/Responsável</th>
+                                <th class="p-3">Responsável</th>
                                 <th class="p-3 text-center">Ação</th>
                             </tr>
                         </thead>
@@ -109,128 +145,108 @@
 
         let todosDados = [];
 
-        // --- LÓGICA DE DADOS ---
         const q = query(colRef, orderBy("timestamp", "asc"));
         
         onSnapshot(q, (snapshot) => {
             todosDados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             atualizarDropdownTurmas();
             
-            // Atualiza visualização atual
             const isPais = !document.getElementById('view-pais').classList.contains('hidden');
             if(isPais) carregarHorariosPais();
             else renderAdminTable();
         });
 
-        // 1. ATUALIZA O DROPDOWN AUTOMATICAMENTE
+        // --- NOVO: LÓGICA DO GERADOR AUTOMÁTICO ---
+        window.gerarAutomatico = async () => {
+            const turma = document.getElementById('gen-turma').value;
+            const data = document.getElementById('gen-data').value;
+            const inicio = document.getElementById('gen-inicio').value;
+            const fim = document.getElementById('gen-fim').value;
+            const duracao = parseInt(document.getElementById('gen-duracao').value);
+
+            // Validações
+            if (!turma || !data || !inicio || !fim || !duracao) return Swal.fire('Erro', 'Preencha todos os campos!', 'warning');
+            
+            // Converte horas em minutos para calcular loop
+            const [hIni, mIni] = inicio.split(':').map(Number);
+            const [hFim, mFim] = fim.split(':').map(Number);
+            
+            let minutoAtual = hIni * 60 + mIni;
+            const minutoFim = hFim * 60 + mFim;
+
+            const novosHorarios = [];
+
+            // Loop para criar slots
+            while (minutoAtual + duracao <= minutoFim + (duracao - 1)) { // Permite o último slot se encaixar
+                // Se passar do horário limite, para
+                if (minutoAtual >= minutoFim) break;
+
+                // Converte minutos de volta para HH:MM
+                const h = Math.floor(minutoAtual / 60);
+                const m = minutoAtual % 60;
+                const horaFormatada = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+                novosHorarios.push({
+                    turma: turma,
+                    data: data,
+                    horario: horaFormatada,
+                    disponivel: true,
+                    pai: "",
+                    timestamp: new Date(`${data}T${horaFormatada}`)
+                });
+
+                minutoAtual += duracao;
+            }
+
+            if (novosHorarios.length === 0) return Swal.fire('Atenção', 'Nenhum horário cabe nesse intervalo.', 'info');
+
+            // Confirmação antes de salvar
+            const confirmacao = await Swal.fire({
+                title: 'Confirmar Geração?',
+                text: `Serão criados ${novosHorarios.length} horários para ${turma} no dia ${data.split('-').reverse().join('/')}.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: 'Sim, gerar!',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (confirmacao.isConfirmed) {
+                Swal.fire({ title: 'Salvando...', didOpen: () => Swal.showLoading() });
+                
+                const batch = writeBatch(db);
+                novosHorarios.forEach(item => {
+                    const novoDoc = doc(collection(db, "agendamentos"));
+                    batch.set(novoDoc, item);
+                });
+
+                await batch.commit();
+                Swal.fire('Sucesso!', 'Horários gerados com sucesso.', 'success');
+            }
+        };
+
+        // --- OUTRAS FUNÇÕES (MANTIDAS) ---
         function atualizarDropdownTurmas() {
-            // Pega todas as turmas únicas do banco
             const turmasUnicas = [...new Set(todosDados.map(item => item.turma))].sort();
             const select = document.getElementById('filtro-turma-pais');
             const valorAtual = select.value;
-
             let html = '<option value="" disabled selected>Clique para escolher...</option>';
-            turmasUnicas.forEach(turma => {
-                html += `<option value="${turma}">${turma}</option>`;
-            });
+            turmasUnicas.forEach(turma => html += `<option value="${turma}">${turma}</option>`);
             select.innerHTML = html;
-            
-            // Tenta manter a seleção se a turma ainda existir
             if(turmasUnicas.includes(valorAtual)) select.value = valorAtual;
         }
 
-        // 2. IMPORTAÇÃO EXCEL (LÓGICA CRÍTICA)
-        window.processarExcel = async () => {
-            const fileInput = document.getElementById('input-excel');
-            const file = fileInput.files[0];
-            
-            if (!file) return Swal.fire('Erro', 'Selecione um arquivo .xlsx', 'error');
-
-            const reader = new FileReader();
-            
-            reader.onload = async (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    // Converte para JSON
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-
-                    if(json.length === 0) return Swal.fire('Vazio', 'Planilha vazia ou ilegível', 'warning');
-
-                    // Batch write (Firestore aceita max 500 por vez, aqui vamos fazer um loop simples para garantir)
-                    let count = 0;
-                    Swal.fire({ title: 'Importando...', text: 'Aguarde um momento', didOpen: () => Swal.showLoading() });
-
-                    const batch = writeBatch(db); // Para operações em lote (melhor performance)
-                    
-                    // Limite do batch firestore é 500, para segurança vamos adicionar um a um se for pouco, 
-                    // ou usar Promises.all para velocidade. Vamos usar Promises para simplicidade.
-                    const promessas = json.map(row => {
-                        // Validação básica das colunas (O Excel deve ter cabeçalhos: Turma, Data, Hora)
-                        // A biblioteca tenta pegar as chaves. Vamos normalizar para minúsculo.
-                        const chaves = Object.keys(row);
-                        const turma = row[chaves.find(k => k.toLowerCase().includes('turma'))];
-                        const dataStr = row[chaves.find(k => k.toLowerCase().includes('data'))]; // Esperado string DD/MM/AAAA ou data Excel
-                        const hora = row[chaves.find(k => k.toLowerCase().includes('hora'))];
-
-                        if(!turma || !dataStr || !hora) return null;
-
-                        // Tratamento de Data (Converter DD/MM/AAAA para YYYY-MM-DD para ordenação)
-                        let dataFormatada = dataStr;
-                        if(typeof dataStr === 'string' && dataStr.includes('/')) {
-                            const [d, m, y] = dataStr.split('/');
-                            dataFormatada = `${y}-${m}-${d}`;
-                        }
-                        
-                        // Tratamento de Data do Excel (se vier como número serial)
-                        if (typeof dataStr === 'number') {
-                             const dateObj = new Date(Math.round((dataStr - 25569)*86400*1000));
-                             dataFormatada = dateObj.toISOString().split('T')[0];
-                        }
-
-                        return addDoc(colRef, {
-                            turma: String(turma).trim(),
-                            data: dataFormatada,
-                            horario: String(hora).trim(),
-                            disponivel: true,
-                            pai: "",
-                            timestamp: new Date(`${dataFormatada}T${hora}`)
-                        });
-                    });
-
-                    await Promise.all(promessas);
-                    
-                    Swal.fire('Sucesso!', `${json.length} horários importados.`, 'success');
-                    fileInput.value = ""; // Limpar input
-
-                } catch (error) {
-                    console.error(error);
-                    Swal.fire('Erro na leitura', 'Verifique se a planilha segue o modelo.', 'error');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        };
-
-        // 3. RENDERIZAÇÃO
         window.carregarHorariosPais = () => {
             const turma = document.getElementById('filtro-turma-pais').value;
             const container = document.getElementById('container-horarios');
             const grid = document.getElementById('grid-horarios');
             const msg = document.getElementById('msg-vazia');
-
             if(!turma) { container.classList.add('hidden'); return; }
-
             container.classList.remove('hidden');
             grid.innerHTML = "";
-            
             const filtrados = todosDados.filter(i => i.turma === turma && i.disponivel);
-
-            if(filtrados.length === 0) {
-                msg.classList.remove('hidden');
-            } else {
+            if(filtrados.length === 0) { msg.classList.remove('hidden'); } 
+            else {
                 msg.classList.add('hidden');
                 filtrados.forEach(item => {
                     const dataBr = item.data.split('-').reverse().join('/');
@@ -260,43 +276,49 @@
             });
         };
 
-        // 4. AÇÕES
+        window.processarExcel = async () => { /* Código Blindado da resposta anterior */ 
+            const fileInput = document.getElementById('input-excel');
+            const file = fileInput.files[0];
+            if (!file) return Swal.fire('Atenção', 'Selecione um arquivo!', 'warning');
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { raw: false, dateNF: 'dd/mm/yyyy' });
+                    if(json.length === 0) return Swal.fire('Erro', 'Planilha vazia.', 'error');
+                    
+                    Swal.fire({ title: 'Importando...', didOpen: () => Swal.showLoading() });
+                    const batch = writeBatch(db);
+                    let count = 0;
+                    json.forEach((row) => {
+                        const keys = Object.keys(row);
+                        const turma = row[keys.find(k => k.toLowerCase().includes('turma'))];
+                        const dataBr = row[keys.find(k => k.toLowerCase().includes('data'))];
+                        const hora = row[keys.find(k => k.toLowerCase().includes('hora'))];
+                        if (turma && dataBr && hora) {
+                            let dataIso = dataBr;
+                            if(dataBr.includes('/')) { const p = dataBr.split('/'); dataIso = `${p[2]}-${p[1]}-${p[0]}`; }
+                            const novoDoc = doc(collection(db, "agendamentos"));
+                            batch.set(novoDoc, { turma: String(turma).trim(), data: dataIso, horario: String(hora).trim(), disponivel: true, pai: "", timestamp: new Date(`${dataIso}T${hora}`) });
+                            count++;
+                        }
+                    });
+                    await batch.commit();
+                    Swal.fire('Sucesso', `${count} importados!`, 'success');
+                } catch (e) { Swal.fire('Erro', 'Falha ao ler Excel.', 'error'); }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
         window.reservar = async (id, hora) => {
-            const { value: nome } = await Swal.fire({
-                title: 'Reservar Horário',
-                text: `Informe o nome do aluno/responsável para às ${hora}`,
-                input: 'text',
-                showCancelButton: true,
-                confirmButtonColor: '#2563eb',
-                confirmButtonText: 'Confirmar',
-                inputValidator: (value) => { if(!value) return 'O nome é obrigatório!' }
-            });
-
-            if (nome) {
-                await updateDoc(doc(db, "agendamentos", id), { disponivel: false, pai: nome });
-                Swal.fire('Agendado!', 'Seu horário está garantido.', 'success');
-            }
+            const { value: nome } = await Swal.fire({ title: 'Reservar Horário', text: `Para as ${hora}, digite o nome:`, input: 'text', showCancelButton: true, confirmButtonText: 'Confirmar' });
+            if (nome) { await updateDoc(doc(db, "agendamentos", id), { disponivel: false, pai: nome }); Swal.fire('Sucesso', 'Agendado!', 'success'); }
         };
-
-        window.deletar = async (id) => {
-            if(confirm('Excluir este horário?')) await deleteDoc(doc(db, "agendamentos", id));
-        };
-
-        window.limparTudo = async () => {
-            if(prompt("Digite 'DELETAR' para apagar TUDO:") === 'DELETAR') {
-                const snapshot = await getDocs(colRef);
-                snapshot.forEach(doc => deleteDoc(doc.ref));
-                alert("Banco de dados limpo!");
-            }
-        };
-
-        // Switch View
-        window.switchView = (view) => {
-            if(view === 'admin' && prompt('Senha:') !== '1992') return alert('Senha errada');
-            document.getElementById('view-pais').classList.toggle('hidden', view !== 'pais');
-            document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
-        }
-
+        window.deletar = async (id) => { if(confirm('Apagar?')) await deleteDoc(doc(db, "agendamentos", id)); };
+        window.limparTudo = async () => { if(prompt("Digite DELETAR para apagar tudo:") === 'DELETAR') { const s = await getDocs(colRef); s.forEach(d => deleteDoc(d.ref)); alert("Limpo!"); } };
+        window.switchView = (view) => { if(view === 'admin' && prompt('Senha:') !== '123') return alert('Senha errada'); document.getElementById('view-pais').classList.toggle('hidden', view !== 'pais'); document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin'); }
     </script>
 </body>
 </html>
