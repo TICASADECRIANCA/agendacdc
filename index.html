@@ -33,8 +33,7 @@
         <section id="view-pais" class="block">
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center mb-8">
                 <h2 class="text-2xl font-bold text-slate-800 mb-2">Agendamento de Reuniões</h2>
-                <p class="text-slate-500 mb-4">Selecione a turma abaixo para visualizar os horários disponíveis.</p>
-                
+                <p class="text-slate-500 mb-4">Selecione a turma abaixo para ver os horários disponíveis.</p>
                 <div class="relative max-w-md mx-auto mt-4">
                     <select id="filtro-turma-pais" onchange="carregarHorariosPais()" class="w-full p-4 pl-12 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-600 outline-none bg-white cursor-pointer hover:border-blue-400 transition">
                         <option value="" disabled selected>Carregando turmas...</option>
@@ -47,7 +46,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" id="grid-horarios"></div>
                 <div id="msg-vazia" class="hidden text-center text-slate-500 py-10 bg-slate-100 rounded-xl border border-slate-200">
                     <i class="fas fa-calendar-times text-4xl text-slate-300 mb-2 block"></i>
-                    Nenhum horário disponível para esta turma no momento.
+                    Nenhum horário disponível para esta turma.
                 </div>
             </div>
         </section>
@@ -62,10 +61,79 @@
                     
                     <div class="lg:col-span-1">
                         <label class="block text-sm font-bold text-slate-600 mb-1">Turma</label>
-                        <input list="lista-turmas-sugestao" id="gen-turma" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Infantil 1A">
-                        <datalist id="lista-turmas-sugestao">
-                            <option value="Infantil 1A"><option value="Infantil 1B"><option value="Infantil 2"><option value="Berçário">
-                        </datalist>
+                        <select id="gen-turma" class="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer">
+                            <option value="" disabled selected>Selecione...</option>
+                            
+                            <optgroup label="Infantil 1">
+                                <option value="Infantil 1A">Infantil 1A</option>
+                                <option value="Infantil 1B">Infantil 1B</option>
+                                <option value="Infantil 1C">Infantil 1C</option>
+                                <option value="Infantil 1D">Infantil 1D</option>
+                                <option value="Infantil 1E">Infantil 1E</option>
+                                <option value="Infantil 1F">Infantil 1F</option>
+                                <option value="Infantil 1G">Infantil 1G</option>
+                            </optgroup>
+
+                            <optgroup label="Infantil 2">
+                                <option value="Infantil 2A">Infantil 2A</option>
+                                <option value="Infantil 2B">Infantil 2B</option>
+                                <option value="Infantil 2C">Infantil 2C</option>
+                                <option value="Infantil 2D">Infantil 2D</option>
+                                <option value="Infantil 2E">Infantil 2E</option>
+                                <option value="Infantil 2F">Infantil 2F</option>
+                                <option value="Infantil 2G">Infantil 2G</option>
+                                <option value="Infantil 2H">Infantil 2H</option>
+                                <option value="Infantil 2I">Infantil 2I</option>
+                                <option value="Infantil 2J">Infantil 2J</option>
+                            </optgroup>
+
+                            <optgroup label="Infantil 3">
+                                <option value="Infantil 3A">Infantil 3A</option>
+                                <option value="Infantil 3B">Infantil 3B</option>
+                                <option value="Infantil 3C">Infantil 3C</option>
+                                <option value="Infantil 3D">Infantil 3D</option>
+                                <option value="Infantil 3E">Infantil 3E</option>
+                                <option value="Infantil 3F">Infantil 3F</option>
+                                <option value="Infantil 3G">Infantil 3G</option>
+                                <option value="Infantil 3H">Infantil 3H</option>
+                                <option value="Infantil 3I">Infantil 3I</option>
+                                <option value="Infantil 3J">Infantil 3J</option>
+                            </optgroup>
+
+                            <optgroup label="Infantil 4">
+                                <option value="Infantil 4A">Infantil 4A</option>
+                                <option value="Infantil 4B">Infantil 4B</option>
+                                <option value="Infantil 4C">Infantil 4C</option>
+                                <option value="Infantil 4D">Infantil 4D</option>
+                                <option value="Infantil 4E">Infantil 4E</option>
+                                <option value="Infantil 4F">Infantil 4F</option>
+                                <option value="Infantil 4G">Infantil 4G</option>
+                                <option value="Infantil 4H">Infantil 4H</option>
+                                <option value="Infantil 4I">Infantil 4I</option>
+                                <option value="Infantil 4J">Infantil 4J</option>
+                            </optgroup>
+
+                            <optgroup label="Infantil 5">
+                                <option value="Infantil 5A">Infantil 5A</option>
+                                <option value="Infantil 5B">Infantil 5B</option>
+                                <option value="Infantil 5C">Infantil 5C</option>
+                                <option value="Infantil 5D">Infantil 5D</option>
+                                <option value="Infantil 5E">Infantil 5E</option>
+                                <option value="Infantil 5F">Infantil 5F</option>
+                                <option value="Infantil 5G">Infantil 5G</option>
+                                <option value="Infantil 5H">Infantil 5H</option>
+                                <option value="Infantil 5I">Infantil 5I</option>
+                            </optgroup>
+
+                            <optgroup label="1 Ano">
+                                <option value="1 Ano A">1 Ano A</option>
+                                <option value="1 Ano B">1 Ano B</option>
+                                <option value="1 Ano C">1 Ano C</option>
+                                <option value="1 Ano D">1 Ano D</option>
+                                <option value="1 Ano I">1 Ano I</option>
+                            </optgroup>
+
+                        </select>
                     </div>
 
                     <div class="lg:col-span-1">
@@ -95,15 +163,6 @@
                 </div>
             </div>
 
-            <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl opacity-90 hover:opacity-100 transition shadow-inner">
-                <h3 class="text-sm font-bold text-indigo-900 mb-3"><i class="fas fa-file-excel mr-2"></i>Alternativa: Importar Planilha (Excel)</h3>
-                <div class="flex gap-4 items-center flex-wrap">
-                    <input type="file" id="input-excel" accept=".xlsx" class="block w-full md:w-auto text-sm text-slate-500 file:bg-white file:text-indigo-700 file:py-2 file:px-4 file:rounded-full file:border-0 hover:file:bg-indigo-100 cursor-pointer shadow-sm"/>
-                    <button onclick="processarExcel()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-indigo-700 transition shadow-md">Importar Arquivo</button>
-                </div>
-                <p class="text-xs text-indigo-400 mt-2 ml-1">O arquivo deve ser <b>.xlsx</b> e conter as colunas: <b>Turma</b>, <b>Data</b> e <b>Hora</b>.</p>
-            </div>
-
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b flex justify-between items-center bg-slate-50">
                     <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-list"></i> Últimos Horários Criados</h3>
@@ -126,18 +185,22 @@
                     </table>
                 </div>
             </div>
+            
+             <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl opacity-90 hover:opacity-100 transition shadow-inner">
+                <h3 class="text-sm font-bold text-indigo-900 mb-3"><i class="fas fa-file-excel mr-2"></i>Alternativa: Importar Planilha (Excel)</h3>
+                <div class="flex gap-4 items-center flex-wrap">
+                    <input type="file" id="input-excel" accept=".xlsx" class="block w-full md:w-auto text-sm text-slate-500 file:bg-white file:text-indigo-700 file:py-2 file:px-4 file:rounded-full file:border-0 hover:file:bg-indigo-100 cursor-pointer shadow-sm"/>
+                    <button onclick="processarExcel()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-indigo-700 transition shadow-md">Importar Arquivo</button>
+                </div>
+            </div>
         </section>
-
     </main>
 
     <script type="module">
-        // Importações diretas do CDN para funcionar sem instalação
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ========================================================
-        // CONFIGURAÇÃO DA CASA DE CRIANÇA (SEUS DADOS REAIS)
-        // ========================================================
+        // CONFIGURAÇÃO DO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDBWADP0CJMbIg5dlU_F4U-LSUbZ_KGngo",
             authDomain: "agendacdc-7c58a.firebaseapp.com",
@@ -147,28 +210,25 @@
             appId: "1:695482072180:web:574479422e33dcfd3b6521"
         };
 
-        // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const colRef = collection(db, "agendamentos");
 
         let todosDados = [];
 
-        // --- 1. MONITORAMENTO EM TEMPO REAL ---
+        // 1. MONITORAMENTO REAL-TIME
         const q = query(colRef, orderBy("timestamp", "asc"));
         
         onSnapshot(q, (snapshot) => {
             todosDados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             atualizarDropdownTurmas();
             
-            // Renderiza apenas a tela ativa para não pesar
             const isPais = !document.getElementById('view-pais').classList.contains('hidden');
             if(isPais) carregarHorariosPais();
             else renderAdminTable();
         });
 
-        // --- 2. SISTEMA TURBO (SALVAMENTO OTIMIZADO) ---
-        // Salva em pacotes de 400 para garantir velocidade e estabilidade
+        // 2. SISTEMA TURBO
         async function salvarEmLotes(listaDeObjetos) {
             const TAMANHO_LOTE = 400; 
             const total = listaDeObjetos.length;
@@ -176,7 +236,7 @@
 
             Swal.fire({
                 title: 'Processando...',
-                html: `Salvando <b>${total}</b> horários no sistema.<br>Por favor, aguarde.`,
+                html: `Salvando <b>${total}</b> horários.<br>Por favor, aguarde.`,
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
@@ -184,25 +244,17 @@
             for (let i = 0; i < total; i += TAMANHO_LOTE) {
                 const loteAtual = listaDeObjetos.slice(i, i + TAMANHO_LOTE);
                 const batch = writeBatch(db);
-                
                 loteAtual.forEach(dado => {
                     const ref = doc(collection(db, "agendamentos"));
                     batch.set(ref, dado);
                 });
-
-                await batch.commit(); // Envia o lote
+                await batch.commit();
                 processados += loteAtual.length;
             }
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Sucesso!',
-                text: `${processados} horários foram criados e já estão online!`,
-                confirmButtonColor: '#2563eb'
-            });
+            Swal.fire({ icon: 'success', title: 'Sucesso!', text: `${processados} horários criados!`, confirmButtonColor: '#2563eb' });
         }
 
-        // --- 3. GERADOR AUTOMÁTICO DE INTERVALOS ---
+        // 3. GERADOR AUTOMÁTICO
         window.gerarAutomatico = async () => {
             const turma = document.getElementById('gen-turma').value;
             const data = document.getElementById('gen-data').value;
@@ -210,7 +262,7 @@
             const fim = document.getElementById('gen-fim').value;
             const duracao = parseInt(document.getElementById('gen-duracao').value);
 
-            if (!turma || !data || !inicio || !fim || !duracao) return Swal.fire('Atenção', 'Preencha todos os campos corretamente.', 'warning');
+            if (!turma || !data || !inicio || !fim || !duracao) return Swal.fire('Atenção', 'Preencha todos os campos.', 'warning');
             
             const [hIni, mIni] = inicio.split(':').map(Number);
             const [hFim, mFim] = fim.split(':').map(Number);
@@ -219,7 +271,6 @@
             const minutoFim = hFim * 60 + mFim;
             const novosHorarios = [];
 
-            // Loop Matemático para criar os slots
             while (minutoAtual + duracao <= minutoFim + (duracao - 1)) {
                 if (minutoAtual >= minutoFim) break;
                 
@@ -238,24 +289,21 @@
                 minutoAtual += duracao;
             }
 
-            if (novosHorarios.length === 0) return Swal.fire('Ops', 'O intervalo de tempo é muito curto para essa duração.', 'info');
+            if (novosHorarios.length === 0) return Swal.fire('Ops', 'Intervalo muito curto.', 'info');
 
-            // Confirmação antes de salvar
             const confirm = await Swal.fire({
                 title: 'Confirmar?',
-                text: `Vou criar ${novosHorarios.length} horários para a turma ${turma}.`,
+                text: `Criar ${novosHorarios.length} horários para a turma ${turma}?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Sim, criar!',
                 confirmButtonColor: '#2563eb'
             });
 
-            if(confirm.isConfirmed) {
-                await salvarEmLotes(novosHorarios);
-            }
+            if(confirm.isConfirmed) await salvarEmLotes(novosHorarios);
         };
 
-        // --- 4. IMPORTAÇÃO EXCEL (BLINDADA) ---
+        // 4. EXCEL
         window.processarExcel = async () => {
             const fileInput = document.getElementById('input-excel');
             const file = fileInput.files[0];
@@ -266,21 +314,18 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    // Lê como texto puro para não bugar datas do Excel
                     const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { raw: false, dateNF: 'dd/mm/yyyy' });
 
-                    if(json.length === 0) return Swal.fire('Vazio', 'A planilha parece estar vazia.', 'warning');
+                    if(json.length === 0) return Swal.fire('Vazio', 'Planilha vazia.', 'warning');
 
                     const listaParaSalvar = [];
                     json.forEach(row => {
                         const keys = Object.keys(row);
-                        // Procura colunas inteligente (ignora maiusculas/minusculas)
                         const turma = row[keys.find(k => k.toLowerCase().includes('turma'))];
                         const dataBr = row[keys.find(k => k.toLowerCase().includes('data'))];
                         const hora = row[keys.find(k => k.toLowerCase().includes('hora'))];
 
                         if(turma && dataBr && hora) {
-                            // Converte data brasileira para padrão ISO (Banco de dados)
                             let dataIso = dataBr;
                             if(dataBr.includes('/')) {
                                 const parts = dataBr.split('/');
@@ -296,21 +341,17 @@
                             });
                         }
                     });
-
-                    if(listaParaSalvar.length === 0) return Swal.fire('Erro', 'Não encontrei colunas Turma, Data e Hora.', 'error');
-
+                    if(listaParaSalvar.length === 0) return Swal.fire('Erro', 'Colunas não encontradas.', 'error');
                     await salvarEmLotes(listaParaSalvar);
-                    fileInput.value = ""; // Limpa o input
-                } catch (err) { 
-                    console.error(err);
-                    Swal.fire('Erro Técnico', 'Falha ao ler o arquivo Excel. Verifique o formato.', 'error'); 
-                }
+                    fileInput.value = "";
+                } catch (err) { Swal.fire('Erro', 'Falha ao ler Excel.', 'error'); }
             };
             reader.readAsArrayBuffer(file);
         };
 
-        // --- 5. FUNÇÕES DE INTERFACE ---
+        // 5. INTERFACE
         function atualizarDropdownTurmas() {
+            // Dropdown dos pais só mostra o que tem horário
             const turmasUnicas = [...new Set(todosDados.map(item => item.turma))].sort();
             const select = document.getElementById('filtro-turma-pais');
             const valorAtual = select.value;
@@ -355,14 +396,7 @@
         window.renderAdminTable = () => {
             const tbody = document.getElementById('tabela-admin');
             tbody.innerHTML = "";
-            
-            // FILTRO DE PERFORMANCE: Mostra só os 100 últimos se tiver muitos
-            let dadosView = todosDados;
-            if (todosDados.length > 100) {
-                dadosView = todosDados.slice(-100).reverse(); 
-            } else {
-                dadosView = [...todosDados].reverse();
-            }
+            let dadosView = todosDados.length > 100 ? todosDados.slice(-100).reverse() : [...todosDados].reverse();
 
             dadosView.forEach(item => {
                 const dataBr = item.data.split('-').reverse().join('/');
@@ -377,19 +411,14 @@
                         </td>
                         <td class="p-3 text-slate-500 text-sm truncate max-w-[150px]">${item.pai || '-'}</td>
                         <td class="p-3 text-center">
-                            <button onclick="deletar('${item.id}')" class="text-slate-400 hover:text-red-600 transition p-2 rounded-full hover:bg-red-50" title="Apagar">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button onclick="deletar('${item.id}')" class="text-slate-400 hover:text-red-600 transition p-2 rounded-full hover:bg-red-50"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
-
-            if(todosDados.length > 100) {
-                tbody.innerHTML += `<tr><td colspan="5" class="text-center text-xs text-slate-400 p-2 bg-slate-50 italic">Exibindo os 100 registros mais recentes de um total de ${todosDados.length}.</td></tr>`;
-            }
+            if(todosDados.length > 100) tbody.innerHTML += `<tr><td colspan="5" class="text-center text-xs text-slate-400 p-2">Exibindo os 100 últimos registros.</td></tr>`;
         };
 
-        // --- 6. AÇÕES GERAIS ---
+        // 6. AÇÕES GERAIS
         window.reservar = async (id, hora) => {
             const { value: nome } = await Swal.fire({
                 title: 'Confirmar Reserva',
@@ -397,7 +426,7 @@
                 input: 'text',
                 showCancelButton: true,
                 confirmButtonColor: '#2563eb',
-                confirmButtonText: 'Confirmar Agendamento',
+                confirmButtonText: 'Confirmar',
                 inputValidator: (value) => { if(!value) return 'O nome é obrigatório!' }
             });
 
@@ -405,56 +434,43 @@
                 try {
                     await updateDoc(doc(db, "agendamentos", id), { disponivel: false, pai: nome });
                     Swal.fire('Sucesso!', `Horário agendado para <b>${nome}</b>.`, 'success');
-                } catch(e) {
-                    Swal.fire('Erro', 'Este horário já pode ter sido pego por outra pessoa.', 'error');
-                }
+                } catch(e) { Swal.fire('Erro', 'Horário já reservado.', 'error'); }
             }
         };
 
-        window.deletar = async (id) => {
-            if(confirm('Tem certeza que deseja apagar este horário específico?')) {
-                await deleteDoc(doc(db, "agendamentos", id));
-            }
-        };
+        window.deletar = async (id) => { if(confirm('Apagar horário?')) await deleteDoc(doc(db, "agendamentos", id)); };
 
         window.limparTudo = async () => {
             const confirmacao = await Swal.fire({
                 title: 'ATENÇÃO MÁXIMA!',
-                text: "Isso vai APAGAR TODOS os horários de TODAS as turmas do banco de dados. Essa ação não tem volta. Digite 'DELETAR' para confirmar:",
+                text: "Digite 'DELETAR' para apagar TODOS os horários de TODAS as turmas:",
                 input: 'text',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                confirmButtonText: 'Apagar Tudo Agora'
+                confirmButtonColor: '#dc2626'
             });
 
             if(confirmacao.value === 'DELETAR') {
-                Swal.fire({ title: 'Limpando banco...', html: 'Isso pode demorar alguns segundos.', didOpen: () => Swal.showLoading() });
-                
-                // Apaga em lotes para não falhar
+                Swal.fire({ title: 'Limpando...', didOpen: () => Swal.showLoading() });
                 const snapshot = await getDocs(colRef);
                 const total = snapshot.docs.length;
                 const batchSize = 400;
-                
                 for(let i=0; i<total; i+=batchSize){
                     const batch = writeBatch(db);
                     snapshot.docs.slice(i, i+batchSize).forEach(doc => batch.delete(doc.ref));
                     await batch.commit();
                 }
-
-                Swal.fire('Concluído', 'O banco de dados está limpo.', 'success');
+                Swal.fire('Concluído', 'Banco limpo.', 'success');
             }
         };
 
         window.switchView = (view) => {
             if(view === 'admin') {
-                // Senha configurada: 1992
-                const senha = prompt('Digite a senha de administrador da Casa de Criança:');
-                if(senha !== '1992') return Swal.fire('Acesso Negado', 'Senha incorreta.', 'error');
+                const senha = prompt('Senha Admin:');
+                if(senha !== '1992') return Swal.fire('Erro', 'Senha incorreta.', 'error');
             }
             document.getElementById('view-pais').classList.toggle('hidden', view !== 'pais');
             document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
-            
             if(view === 'admin') renderAdminTable();
         }
     </script>
