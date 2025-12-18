@@ -81,7 +81,19 @@
             <div class="bg-teal-50 border border-teal-200 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex-1">
                     <h3 class="font-bold text-teal-900 text-lg flex items-center gap-2"><i class="fas fa-share-alt"></i> Link para os Pais</h3>
-                    <p class="text-teal-700 text-sm mt-1">Gere o QR Code para compartilhar.</p>
+                    <p class="text-teal-700 text-sm mt-1 mb-4">Compartilhe o link de agendamento via:</p>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="compartilharZap()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-2">
+                            <i class="fab fa-whatsapp text-lg"></i> WhatsApp
+                        </button>
+                        <button onclick="compartilharTelegram()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-2">
+                            <i class="fab fa-telegram text-lg"></i> Telegram
+                        </button>
+                        <button onclick="copiarLink()" class="bg-white border border-teal-300 text-teal-700 hover:bg-teal-100 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
+                    </div>
                 </div>
                 <div class="flex flex-col items-center gap-3">
                     <div id="qrcode" class="bg-white p-2 rounded shadow-sm"></div>
@@ -97,7 +109,7 @@
                         <label class="block text-xs font-bold text-slate-500 mb-1">TURMA</label>
                         <select id="gen-turma" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                             <option value="" disabled selected>Selecione...</option>
-                             <optgroup label="Infantil 1"><option value="Infantil 1A">Infantil 1A</option><option value="Infantil 1B">Infantil 1B</option><option value="Infantil 1C">Infantil 1C</option><option value="Infantil 1D">Infantil 1D</option><option value="Infantil 1E">Infantil 1E</option><option value="Infantil 1F">Infantil 1F</option><option value="Infantil 1G">Infantil 1G</option></optgroup>
+                            <optgroup label="Infantil 1"><option value="Infantil 1A">Infantil 1A</option><option value="Infantil 1B">Infantil 1B</option><option value="Infantil 1C">Infantil 1C</option><option value="Infantil 1D">Infantil 1D</option><option value="Infantil 1E">Infantil 1E</option><option value="Infantil 1F">Infantil 1F</option><option value="Infantil 1G">Infantil 1G</option></optgroup>
                             <optgroup label="Infantil 2"><option value="Infantil 2A">Infantil 2A</option><option value="Infantil 2B">Infantil 2B</option><option value="Infantil 2C">Infantil 2C</option><option value="Infantil 2D">Infantil 2D</option><option value="Infantil 2E">Infantil 2E</option><option value="Infantil 2F">Infantil 2F</option><option value="Infantil 2G">Infantil 2G</option><option value="Infantil 2H">Infantil 2H</option><option value="Infantil 2I">Infantil 2I</option><option value="Infantil 2J">Infantil 2J</option></optgroup>
                             <optgroup label="Infantil 3"><option value="Infantil 3A">Infantil 3A</option><option value="Infantil 3B">Infantil 3B</option><option value="Infantil 3C">Infantil 3C</option><option value="Infantil 3D">Infantil 3D</option><option value="Infantil 3E">Infantil 3E</option><option value="Infantil 3F">Infantil 3F</option><option value="Infantil 3G">Infantil 3G</option><option value="Infantil 3H">Infantil 3H</option><option value="Infantil 3I">Infantil 3I</option><option value="Infantil 3J">Infantil 3J</option></optgroup>
                             <optgroup label="Infantil 4"><option value="Infantil 4A">Infantil 4A</option><option value="Infantil 4B">Infantil 4B</option><option value="Infantil 4C">Infantil 4C</option><option value="Infantil 4D">Infantil 4D</option><option value="Infantil 4E">Infantil 4E</option><option value="Infantil 4F">Infantil 4F</option><option value="Infantil 4G">Infantil 4G</option><option value="Infantil 4H">Infantil 4H</option><option value="Infantil 4I">Infantil 4I</option><option value="Infantil 4J">Infantil 4J</option></optgroup>
@@ -202,17 +214,27 @@
         const colRef = collection(db, "agendamentos");
 
         // ======================================================
-        // CONFIGURAÇÃO DO EMAILJS (CHAVES INSERIDAS)
+        // CONFIGURAÇÃO DO EMAILJS
         // ======================================================
         const EMAILJS_PUBLIC_KEY = "4tbEarblUcSQF-XMn"; 
         const EMAILJS_SERVICE_ID = "service_dp5egap"; 
         const EMAILJS_TEMPLATE_ID = "template_4eyd3qa"; 
         
-        // Inicializa EmailJS
+        // -----------------------------------------------------
+        // CONFIGURAÇÃO DOS E-MAILS DAS PROFESSORAS
+        // -----------------------------------------------------
+        // PREENCHA AQUI OS EMAILS CORRETOS
+        const EMAILS_PROFESSORES = {
+            "Infantil 1A": "professora1a@escola.com",
+            "Infantil 1B": "professora1b@escola.com",
+            // Adicione todas as turmas aqui seguindo o padrão...
+            "1 Ano A": "prof1anoa@escola.com",
+            "PADRAO": "coordenacao@escola.com" // Email caso a turma não seja encontrada
+        };
+
         (function(){
             emailjs.init(EMAILJS_PUBLIC_KEY);
         })();
-        // ======================================================
 
         let todosDados = [];
         let isAdmin = false;
@@ -266,6 +288,7 @@
             gerarQRCode();
         };
 
+        // QR CODE E COMPARTILHAMENTO
         function gerarQRCode() {
             const urlLimpa = window.location.href.split('?')[0]; 
             const divQR = document.getElementById("qrcode");
@@ -273,6 +296,25 @@
             new QRCode(divQR, { text: urlLimpa, width: 100, height: 100, colorDark : "#115e59", colorLight : "#ffffff" });
             document.getElementById('link-atual').innerText = urlLimpa;
         }
+
+        window.compartilharZap = () => {
+            const url = window.location.href.split('?')[0];
+            const texto = `Olá! Segue o link para o agendamento da reunião escolar: ${url}`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+        };
+
+        window.compartilharTelegram = () => {
+            const url = window.location.href.split('?')[0];
+            const texto = `Olá! Segue o link para o agendamento da reunião escolar:`;
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(texto)}`, '_blank');
+        };
+        
+        window.copiarLink = () => {
+            const url = window.location.href.split('?')[0];
+            navigator.clipboard.writeText(url).then(() => {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Link copiado!', showConfirmButton: false, timer: 1500 });
+            });
+        };
 
         // DATABASE LISTENER
         const q = query(colRef, orderBy("timestamp", "asc"));
@@ -344,13 +386,52 @@
             });
         };
 
+        // GERAR LINKS DE CALENDÁRIO
+        function gerarLinksCalendario(titulo, dataIso, horario, descricao) {
+            // Formato Google: YYYYMMDDTHHMMSSZ
+            const inicio = new Date(`${dataIso}T${horario}:00`);
+            const fim = new Date(inicio.getTime() + 20*60000); // 20 minutos de duração
+
+            const formatG = (d) => d.toISOString().replace(/-|:|\.\d+/g, '');
+            
+            const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titulo)}&dates=${formatG(inicio)}/${formatG(fim)}&details=${encodeURIComponent(descricao)}&sf=true&output=xml`;
+            
+            const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(titulo)}&startdt=${inicio.toISOString()}&enddt=${fim.toISOString()}&body=${encodeURIComponent(descricao)}`;
+
+            return { googleUrl, outlookUrl, inicio, fim };
+        }
+
+        // BAIXAR ARQUIVO .ICS
+        function baixarICS(titulo, inicio, fim, descricao) {
+            const formatICS = (d) => d.toISOString().replace(/-|:|\.\d+/g, '');
+            const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//CasaDeCrianca//Agendamento//PT
+BEGIN:VEVENT
+UID:${Date.now()}@casadecrianca.com
+DTSTAMP:${formatICS(new Date())}
+DTSTART:${formatICS(inicio)}
+DTEND:${formatICS(fim)}
+SUMMARY:${titulo}
+DESCRIPTION:${descricao}
+END:VEVENT
+END:VCALENDAR`;
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'reuniao_escolar.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // ============================================
-        //  RESERVA COM ENVIO DE EMAIL
+        //  RESERVA COM ENVIO DE EMAIL E CALENDARIO
         // ============================================
         window.reservarComEmail = async (id, hora, dataIso, turma) => {
             const dataBr = dataIso.split('-').reverse().join('/');
             
-            // Pop-up agora pede o EMAIL também
             const { value: formValues } = await Swal.fire({
                 title: 'Confirmar Agendamento',
                 html: `
@@ -387,7 +468,6 @@
             });
 
             if (formValues) {
-                // Loading enquanto processa
                 Swal.fire({ 
                     title: 'Processando...', 
                     html: 'Salvando e enviando e-mail de confirmação.', 
@@ -402,14 +482,24 @@
                         pai: `${formValues.r} (Aluno: ${formValues.a})` 
                     });
 
-                    // 2. Envia o E-mail via EmailJS
+                    // 2. Prepara dados para Email
+                    const emailProfessora = EMAILS_PROFESSORES[turma] || EMAILS_PROFESSORES["PADRAO"];
+                    const tituloEvento = `Reunião Escolar - ${formValues.a}`;
+                    const descEvento = `Reunião com os pais de ${formValues.a} (Resp: ${formValues.r}) da turma ${turma}.`;
+                    
+                    // Gera links de calendário
+                    const calendarios = gerarLinksCalendario(tituloEvento, dataIso, hora, descEvento);
+
                     const emailParams = {
                         responsavel: formValues.r,
                         aluno: formValues.a,
                         data: dataBr,
                         horario: hora,
                         turma: turma,
-                        to_email: formValues.e 
+                        to_email: formValues.e,
+                        email_professora: emailProfessora, // Variável nova para o EmailJS (CC)
+                        link_google: calendarios.googleUrl, // Link Google Calendar
+                        link_outlook: calendarios.outlookUrl // Link Outlook
                     };
 
                     try {
@@ -417,17 +507,18 @@
                         console.log("Email enviado com sucesso!");
                     } catch (errEmail) {
                         console.error("Erro no email:", errEmail);
-                        // Não mostramos erro para o usuário se o banco funcionou
                     }
                     
+                    // 3. Baixa o arquivo ICS automaticamente
+                    baixarICS(tituloEvento, calendarios.inicio, calendarios.fim, descEvento);
+
                     Swal.fire({
                         icon: 'success',
                         title: 'Confirmado!',
-                        text: `Agendamento realizado. Um cartão de confirmação foi enviado para ${formValues.e}.`,
+                        text: `Agendamento realizado. Um arquivo de calendário foi baixado e a confirmação enviada para ${formValues.e}.`,
                         confirmButtonColor: '#2563eb'
                     });
 
-                    // Limpa tela
                     document.getElementById('area-horarios').classList.add('hidden');
                     document.getElementById('area-datas').classList.add('hidden');
                     document.getElementById('filtro-turma-pais').value = "";
@@ -503,34 +594,15 @@
             Object.keys(porTurma).sort().forEach(turma => {
                 const lista = porTurma[turma].sort((a, b) => a.timestamp - b.timestamp);
                 html += `<div style="margin-bottom:30px;page-break-inside:avoid;"><h2 style="background:#f3f4f6;padding:5px;">${turma}</h2><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #000;text-align:left"><th style="padding:5px">DATA/HORA</th><th style="padding:5px">RESPONSÁVEL</th></tr></thead><tbody>`;
-                lista.forEach(i => html += `<tr><td style="padding:5px">${i.data.split('-').reverse().join('/')} - <b>${i.horario}</b></td><td style="padding:5px">${i.pai}</td></tr>`);
+                lista.forEach(i => html += `<tr><td style="padding:5px">${i.data.split('-').reverse().join('/')} - ${i.horario}</td><td style="padding:5px">${i.pai}</td></tr>`);
                 html += `</tbody></table></div>`;
             });
-
-            const win = window.open('','','width=800,height=600');
-            win.document.write('<html><head><title>Print</title></head><body>'+html+'</body></html>');
-            setTimeout(() => { win.print(); win.close(); }, 500);
+            
+            const area = document.getElementById('area-impressao');
+            area.innerHTML = html;
+            window.print();
+            setTimeout(() => area.innerHTML = '', 1000);
         };
-
-        window.processarExcel = async () => {
-            const f = document.getElementById('input-excel').files[0];
-            if(!f) return;
-            const r = new FileReader();
-            r.onload = async (e) => {
-                const wb = XLSX.read(e.target.result, {type:'array'});
-                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {raw:false});
-                const batch = writeBatch(db);
-                json.forEach(row => {
-                     const k = Object.keys(row);
-                    const t = row[k.find(x=>x.match(/turma/i))], d = row[k.find(x=>x.match(/data/i))], h = row[k.find(x=>x.match(/hora/i))];
-                    if(t&&d&&h) batch.set(doc(collection(db, "agendamentos")), {turma:t, data:d.includes('/')?d.split('/').reverse().join('-'):d, horario:h, disponivel:true, pai:"", timestamp: new Date()});
-                });
-                await batch.commit();
-                Swal.fire('Importado!');
-            };
-            r.readAsArrayBuffer(f);
-        }
     </script>
 </body>
 </html>
-
