@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
     <style>
         @media print {
             body * { visibility: hidden; }
@@ -181,13 +181,6 @@
                     </table>
                 </div>
             </div>
-            
-             <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                <div class="flex gap-2 items-center">
-                    <input type="file" id="input-excel" accept=".xlsx" class="text-xs text-slate-500 w-full"/>
-                    <button onclick="processarExcel()" class="bg-indigo-600 text-white px-4 py-1 rounded text-xs font-bold hover:bg-indigo-700">Importar</button>
-                </div>
-            </div>
         </section>
     </main>
 
@@ -197,7 +190,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // FIREBASE CONFIG (Mantido para controle de horários em tempo real)
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDBWADP0CJMbIg5dlU_F4U-LSUbZ_KGngo",
             authDomain: "agendacdc-7c58a.firebaseapp.com",
@@ -211,17 +204,12 @@
         const db = getFirestore(app);
         const colRef = collection(db, "agendamentos");
 
-        // ======================================================
-        // URL DO SEU SCRIPT GOOGLE (Substituindo EmailJS)
-        // ======================================================
+        // URL DO GOOGLE SCRIPT (Sua URL já colocada aqui)
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkCfZOtgj54l47hwmyzcvqP8muTX8dtojcOS4MQ3N1ZKqmbEhJKR7BdYPdajQVNLiVvQ/exec";
         
-        // -----------------------------------------------------
-        // CONFIGURAÇÃO DOS E-MAILS DAS PROFESSORAS
-        // -----------------------------------------------------
-        // PREENCHA AQUI OS EMAILS CORRETOS
+        // CONFIGURAÇÃO DOS E-MAILS
+        // ATENÇÃO: Substitua pelos e-mails reais das professoras
         const EMAILS_PROFESSORES = {
-            // --- INFANTIL 1 ---
             "Infantil 1A": "email@escola.com",
             "Infantil 1B": "email@escola.com",
             "Infantil 1C": "email@escola.com",
@@ -229,8 +217,6 @@
             "Infantil 1E": "email@escola.com",
             "Infantil 1F": "email@escola.com",
             "Infantil 1G": "email@escola.com",
-            
-            // --- INFANTIL 2 ---
             "Infantil 2A": "email@escola.com",
             "Infantil 2B": "email@escola.com",
             "Infantil 2C": "email@escola.com",
@@ -241,8 +227,6 @@
             "Infantil 2H": "email@escola.com",
             "Infantil 2I": "email@escola.com",
             "Infantil 2J": "email@escola.com",
-
-            // --- INFANTIL 3 ---
             "Infantil 3A": "email@escola.com",
             "Infantil 3B": "email@escola.com",
             "Infantil 3C": "email@escola.com",
@@ -253,8 +237,6 @@
             "Infantil 3H": "email@escola.com",
             "Infantil 3I": "email@escola.com",
             "Infantil 3J": "email@escola.com",
-
-            // --- INFANTIL 4 ---
             "Infantil 4A": "email@escola.com",
             "Infantil 4B": "email@escola.com",
             "Infantil 4C": "email@escola.com",
@@ -265,8 +247,6 @@
             "Infantil 4H": "email@escola.com",
             "Infantil 4I": "email@escola.com",
             "Infantil 4J": "email@escola.com",
-
-            // --- INFANTIL 5 ---
             "Infantil 5A": "email@escola.com",
             "Infantil 5B": "email@escola.com",
             "Infantil 5C": "email@escola.com",
@@ -276,15 +256,12 @@
             "Infantil 5G": "email@escola.com",
             "Infantil 5H": "email@escola.com",
             "Infantil 5I": "email@escola.com",
-
-            // --- 1 ANO ---
             "1 Ano A": "email@escola.com",
             "1 Ano B": "email@escola.com",
             "1 Ano C": "email@escola.com",
             "1 Ano D": "email@escola.com",
             "1 Ano I": "email@escola.com",
-
-            "PADRAO": "coordenacao@escola.com" // Email caso a turma não seja encontrada
+            "PADRAO": "coordenacao@escola.com"
         };
 
         let todosDados = [];
@@ -437,48 +414,8 @@
             });
         };
 
-        // GERAR LINKS DE CALENDÁRIO
-        function gerarLinksCalendario(titulo, dataIso, horario, descricao) {
-            // Formato Google: YYYYMMDDTHHMMSSZ
-            const inicio = new Date(`${dataIso}T${horario}:00`);
-            const fim = new Date(inicio.getTime() + 20*60000); // 20 minutos de duração
-
-            const formatG = (d) => d.toISOString().replace(/-|:|\.\d+/g, '');
-            
-            const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titulo)}&dates=${formatG(inicio)}/${formatG(fim)}&details=${encodeURIComponent(descricao)}&sf=true&output=xml`;
-            
-            const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(titulo)}&startdt=${inicio.toISOString()}&enddt=${fim.toISOString()}&body=${encodeURIComponent(descricao)}`;
-
-            return { googleUrl, outlookUrl, inicio, fim };
-        }
-
-        // BAIXAR ARQUIVO .ICS
-        function baixarICS(titulo, inicio, fim, descricao) {
-            const formatICS = (d) => d.toISOString().replace(/-|:|\.\d+/g, '');
-            const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//CasaDeCrianca//Agendamento//PT
-BEGIN:VEVENT
-UID:${Date.now()}@casadecrianca.com
-DTSTAMP:${formatICS(new Date())}
-DTSTART:${formatICS(inicio)}
-DTEND:${formatICS(fim)}
-SUMMARY:${titulo}
-DESCRIPTION:${descricao}
-END:VEVENT
-END:VCALENDAR`;
-
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', 'reuniao_escolar.ics');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
         // ============================================
-        //  RESERVA COM GOOGLE SHEETS E EMAIL (SUBSTITUINDO EMAILJS)
+        //  RESERVA FINAL (COM EMAIL PAI + SEM ARQUIVO ICS)
         // ============================================
         window.reservarComEmail = async (id, hora, dataIso, turma) => {
             const dataBr = dataIso.split('-').reverse().join('/');
@@ -527,7 +464,7 @@ END:VCALENDAR`;
                 });
 
                 try {
-                    // 1. Salva no Firebase (Isso garante que o horário fique ocupado para outros pais IMEDIATAMENTE)
+                    // 1. Salva no Firebase
                     await updateDoc(doc(db, "agendamentos", id), { 
                         disponivel: false, 
                         pai: `${formValues.r} (Aluno: ${formValues.a})` 
@@ -535,26 +472,19 @@ END:VCALENDAR`;
 
                     // 2. Prepara envio para Google Sheets + Email
                     const emailProfessora = EMAILS_PROFESSORES[turma] || EMAILS_PROFESSORES["PADRAO"];
-                    const tituloEvento = `Reunião Escolar - ${formValues.a}`;
-                    const descEvento = `Reunião com os pais de ${formValues.a} (Resp: ${formValues.r}) da turma ${turma}.`;
-                    
-                    // Gera links de calendário para uso futuro se precisar
-                    const calendarios = gerarLinksCalendario(tituloEvento, dataIso, hora, descEvento);
 
-                    // Payload para o Google Script
                     const dadosParaEnvio = {
                         nomeResponsavel: formValues.r,
                         nomeAluno: formValues.a,
                         turma: turma,
-                        nomeProfessor: "Professora da " + turma,
+                        nomeProfessor: "Professora da " + turma, 
                         emailProfessor: emailProfessora,
-                        emailResponsavel: formValues.e, // <--- ADICIONE ESTA LINHA (é o email que a pessoa digitou)
+                        emailResponsavel: formValues.e, // <--- CAMPO DO EMAIL DO PAI
                         data: dataBr,
                         horario: hora
                     };
 
-                    // Envia para o Google Script via Fetch
-                    // mode: 'no-cors' é usado para evitar bloqueio de navegador, pois o Google retorna um redirect
+                    // Envia para o Google Script
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: "POST",
                         mode: "no-cors", 
@@ -562,16 +492,15 @@ END:VCALENDAR`;
                         body: JSON.stringify(dadosParaEnvio)
                     });
                     
-                    // 3. Baixa o arquivo ICS automaticamente
-                    baixarICS(tituloEvento, calendarios.inicio, calendarios.fim, descEvento);
-
+                    // Sucesso na tela (Sem baixar ICS)
                     Swal.fire({
                         icon: 'success',
                         title: 'Confirmado!',
-                        text: `Agendamento realizado com sucesso para ${formValues.e}.`,
+                        text: `Agendamento realizado! Um e-mail foi enviado para ${formValues.e} e para a escola.`,
                         confirmButtonColor: '#2563eb'
                     });
 
+                    // Limpa a tela
                     document.getElementById('area-horarios').classList.add('hidden');
                     document.getElementById('area-datas').classList.add('hidden');
                     document.getElementById('filtro-turma-pais').value = "";
@@ -654,7 +583,6 @@ END:VCALENDAR`;
             });
         }
         
-        // IMPRESSÃO E RELATÓRIO
         window.imprimirSelecionado = () => {
             const turma = document.getElementById('select-impressao').value;
             if(!turma) return Swal.fire('Erro', 'Selecione uma turma para imprimir.', 'error');
@@ -667,7 +595,6 @@ END:VCALENDAR`;
             
             if(dados.length === 0) return Swal.fire('Aviso', 'Nada para imprimir.', 'info');
 
-            // Ordenar por turma e depois horario
             dados.sort((a,b) => a.turma.localeCompare(b.turma) || a.horario.localeCompare(b.horario));
 
             let html = `
@@ -706,4 +633,3 @@ END:VCALENDAR`;
     </script>
 </body>
 </html>
-
