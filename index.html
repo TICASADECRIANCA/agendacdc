@@ -225,10 +225,69 @@
         // -----------------------------------------------------
         // PREENCHA AQUI OS EMAILS CORRETOS
         const EMAILS_PROFESSORES = {
-            "Infantil 1A": "professora1a@escola.com",
-            "Infantil 1B": "professora1b@escola.com",
-            // Adicione todas as turmas aqui seguindo o padrão...
-            "1 Ano A": "prof1anoa@escola.com",
+            // --- INFANTIL 1 ---
+            "Infantil 1A": "email@escola.com",
+            "Infantil 1B": "email@escola.com",
+            "Infantil 1C": "email@escola.com",
+            "Infantil 1D": "email@escola.com",
+            "Infantil 1E": "email@escola.com",
+            "Infantil 1F": "email@escola.com",
+            "Infantil 1G": "email@escola.com",
+            
+            // --- INFANTIL 2 ---
+            "Infantil 2A": "email@escola.com",
+            "Infantil 2B": "email@escola.com",
+            "Infantil 2C": "email@escola.com",
+            "Infantil 2D": "email@escola.com",
+            "Infantil 2E": "email@escola.com",
+            "Infantil 2F": "email@escola.com",
+            "Infantil 2G": "email@escola.com",
+            "Infantil 2H": "email@escola.com",
+            "Infantil 2I": "email@escola.com",
+            "Infantil 2J": "email@escola.com",
+
+            // --- INFANTIL 3 ---
+            "Infantil 3A": "email@escola.com",
+            "Infantil 3B": "email@escola.com",
+            "Infantil 3C": "email@escola.com",
+            "Infantil 3D": "email@escola.com",
+            "Infantil 3E": "email@escola.com",
+            "Infantil 3F": "email@escola.com",
+            "Infantil 3G": "email@escola.com",
+            "Infantil 3H": "email@escola.com",
+            "Infantil 3I": "email@escola.com",
+            "Infantil 3J": "email@escola.com",
+
+            // --- INFANTIL 4 ---
+            "Infantil 4A": "email@escola.com",
+            "Infantil 4B": "email@escola.com",
+            "Infantil 4C": "email@escola.com",
+            "Infantil 4D": "email@escola.com",
+            "Infantil 4E": "email@escola.com",
+            "Infantil 4F": "email@escola.com",
+            "Infantil 4G": "email@escola.com",
+            "Infantil 4H": "email@escola.com",
+            "Infantil 4I": "email@escola.com",
+            "Infantil 4J": "email@escola.com",
+
+            // --- INFANTIL 5 ---
+            "Infantil 5A": "email@escola.com",
+            "Infantil 5B": "email@escola.com",
+            "Infantil 5C": "email@escola.com",
+            "Infantil 5D": "email@escola.com",
+            "Infantil 5E": "email@escola.com",
+            "Infantil 5F": "email@escola.com",
+            "Infantil 5G": "email@escola.com",
+            "Infantil 5H": "email@escola.com",
+            "Infantil 5I": "email@escola.com",
+
+            // --- 1 ANO ---
+            "1 Ano A": "email@escola.com",
+            "1 Ano B": "email@escola.com",
+            "1 Ano C": "email@escola.com",
+            "1 Ano D": "email@escola.com",
+            "1 Ano I": "email@escola.com",
+
             "PADRAO": "coordenacao@escola.com" // Email caso a turma não seja encontrada
         };
 
@@ -530,79 +589,126 @@ END:VCALENDAR`;
             }
         };
 
-        // ADMIN FUNÇÕES (Mantidas)
+        // ADMIN FUNÇÕES
         window.gerarAutomatico = async () => {
-             const t = document.getElementById('gen-turma').value;
+            const t = document.getElementById('gen-turma').value;
             const d = document.getElementById('gen-data').value;
-            const i = document.getElementById('gen-inicio').value;
-            const f = document.getElementById('gen-fim').value;
-            const dur = parseInt(document.getElementById('gen-duracao').value);
-            if (!t || !d || !i || !f || !dur) return Swal.fire('Erro', 'Preencha tudo.', 'warning');
-            const [hIni, mIni] = i.split(':').map(Number);
-            const [hFim, mFim] = f.split(':').map(Number);
-            let mAtual = hIni * 60 + mIni, mFimCalc = hFim * 60 + mFim, novos = [];
-            while (mAtual + dur <= mFimCalc + (dur - 1)) {
-                if (mAtual >= mFimCalc) break;
-                const h = Math.floor(mAtual / 60), m = mAtual % 60;
-                const hF = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-                novos.push({ turma: t, data: d, horario: hF, disponivel: true, pai: "", timestamp: new Date(`${d}T${hF}`) });
-                mAtual += dur;
+            const inicio = document.getElementById('gen-inicio').value;
+            const fim = document.getElementById('gen-fim').value;
+            const duracao = parseInt(document.getElementById('gen-duracao').value);
+
+            if (!t || !d || !inicio || !fim) return Swal.fire('Erro', 'Preencha todos os campos!', 'error');
+
+            Swal.fire({ title: 'Gerando...', didOpen: () => Swal.showLoading() });
+
+            let atual = new Date(`2000-01-01T${inicio}`);
+            let limite = new Date(`2000-01-01T${fim}`);
+            const batch = writeBatch(db);
+            let count = 0;
+
+            while (atual < limite) {
+                const h = atual.toTimeString().substring(0, 5);
+                const ref = doc(collection(db, "agendamentos"));
+                batch.set(ref, {
+                    turma: t,
+                    data: d,
+                    horario: h,
+                    disponivel: true,
+                    timestamp: new Date().toISOString()
+                });
+                count++;
+                atual.setMinutes(atual.getMinutes() + duracao);
             }
-            if (novos.length > 0 && (await Swal.fire({ title: `Criar ${novos.length} horários?`, showCancelButton: true })).isConfirmed) {
-                const batch = writeBatch(db);
-                novos.forEach(x => batch.set(doc(collection(db, "agendamentos")), x));
-                await batch.commit();
-                Swal.fire('Sucesso!');
-            }
+
+            await batch.commit();
+            Swal.fire('Sucesso', `${count} horários criados para ${t}!`, 'success');
         };
 
-        window.renderAdminTable = () => {
-            const tbody = document.getElementById('tabela-admin');
-            tbody.innerHTML = "";
-            (todosDados.length > 100 ? todosDados.slice(-100).reverse() : [...todosDados].reverse()).forEach(i => {
-                tbody.innerHTML += `<tr class="border-b border-slate-50 hover:bg-slate-50"><td class="p-3 font-bold text-slate-700">${i.turma}</td><td class="p-3 text-xs font-mono text-slate-500">${i.data.split('-').reverse().join('/')} ${i.horario}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${i.disponivel?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${i.disponivel?'LIVRE':'OCUPADO'}</span></td><td class="p-3 text-xs text-slate-600 truncate max-w-[150px]">${i.pai || '-'}</td><td class="p-3 text-center"><button onclick="deletar('${i.id}')" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;
-            });
+        window.excluirItem = async (id) => {
+            const { isConfirmed } = await Swal.fire({ title: 'Excluir?', icon: 'warning', showCancelButton: true });
+            if (isConfirmed) await deleteDoc(doc(db, "agendamentos", id));
         };
 
-        window.deletar = async (id) => { if(confirm('Apagar?')) await deleteDoc(doc(db, "agendamentos", id)); };
-        
         window.limparTudo = async () => {
-            if((await Swal.fire({title:'Apagar TUDO?', text:"Digite APAGAR", input:'text', showCancelButton:true})).value === 'APAGAR') {
-                const s = await getDocs(colRef);
+            const { isConfirmed } = await Swal.fire({ title: 'Apagar TUDO?', text: 'Isso apaga TODOS os agendamentos.', icon: 'warning', showCancelButton: true });
+            if (isConfirmed) {
+                const snap = await getDocs(collection(db, "agendamentos"));
                 const batch = writeBatch(db);
-                s.docs.forEach(d => batch.delete(d.ref));
+                snap.forEach(d => batch.delete(d.ref));
                 await batch.commit();
-                Swal.fire('Limpo!');
+                Swal.fire('Limpo', '', 'success');
             }
         };
 
+        function renderAdminTable() {
+            const tbody = document.getElementById('tabela-admin');
+            tbody.innerHTML = '';
+            todosDados.forEach(d => {
+                const cor = d.disponivel ? 'text-green-600' : 'text-red-600 font-bold';
+                const status = d.disponivel ? 'Livre' : 'Ocupado';
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-3">${d.turma}</td>
+                        <td class="p-3">${d.data.split('-').reverse().join('/')} - ${d.horario}</td>
+                        <td class="p-3 ${cor}">${status}</td>
+                        <td class="p-3 text-xs text-slate-500">${d.pai || '-'}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="excluirItem('${d.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        
+        // IMPRESSÃO E RELATÓRIO
         window.imprimirSelecionado = () => {
             const turma = document.getElementById('select-impressao').value;
-            if(!turma) return Swal.fire('Atenção', 'Selecione uma turma.', 'warning');
+            if(!turma) return Swal.fire('Erro', 'Selecione uma turma para imprimir.', 'error');
             imprimirRelatorio(turma);
-        }
+        };
 
-        window.imprimirRelatorio = (turmaEspecifica = null) => {
-            let dadosImpressao = todosDados.filter(item => !item.disponivel && item.pai);
-            if(turmaEspecifica) dadosImpressao = dadosImpressao.filter(item => item.turma === turmaEspecifica);
-            if(dadosImpressao.length === 0) return Swal.fire('Vazio', 'Nada para imprimir.', 'info');
-
-            const porTurma = {};
-            dadosImpressao.forEach(item => { if(!porTurma[item.turma]) porTurma[item.turma]=[]; porTurma[item.turma].push(item); });
-
-            let html = `<div style="font-family:sans-serif;max-width:800px;margin:0 auto;text-align:center;padding-top:20px;"><h1>Relatório</h1><p>${new Date().toLocaleDateString()}</p></div>`;
-            Object.keys(porTurma).sort().forEach(turma => {
-                const lista = porTurma[turma].sort((a, b) => a.timestamp - b.timestamp);
-                html += `<div style="margin-bottom:30px;page-break-inside:avoid;"><h2 style="background:#f3f4f6;padding:5px;">${turma}</h2><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #000;text-align:left"><th style="padding:5px">DATA/HORA</th><th style="padding:5px">RESPONSÁVEL</th></tr></thead><tbody>`;
-                lista.forEach(i => html += `<tr><td style="padding:5px">${i.data.split('-').reverse().join('/')} - ${i.horario}</td><td style="padding:5px">${i.pai}</td></tr>`);
-                html += `</tbody></table></div>`;
-            });
-            
+        window.imprimirRelatorio = (filtroTurma) => {
             const area = document.getElementById('area-impressao');
+            const dados = filtroTurma ? todosDados.filter(d => d.turma === filtroTurma) : todosDados;
+            
+            if(dados.length === 0) return Swal.fire('Aviso', 'Nada para imprimir.', 'info');
+
+            // Ordenar por turma e depois horario
+            dados.sort((a,b) => a.turma.localeCompare(b.turma) || a.horario.localeCompare(b.horario));
+
+            let html = `
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl font-bold">Relatório de Agendamentos</h1>
+                    <p class="text-gray-500">${filtroTurma ? 'Turma: ' + filtroTurma : 'Todas as Turmas'}</p>
+                </div>
+                <table class="w-full border-collapse border border-gray-300 text-sm">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-2">Turma</th>
+                            <th class="border p-2">Data</th>
+                            <th class="border p-2">Hora</th>
+                            <th class="border p-2">Responsável / Aluno</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            dados.forEach(d => {
+                if(!d.disponivel) {
+                    html += `
+                        <tr>
+                            <td class="border p-2">${d.turma}</td>
+                            <td class="border p-2">${d.data.split('-').reverse().join('/')}</td>
+                            <td class="border p-2">${d.horario}</td>
+                            <td class="border p-2 font-bold">${d.pai}</td>
+                        </tr>`;
+                }
+            });
+
+            html += `</tbody></table>`;
             area.innerHTML = html;
             window.print();
-            setTimeout(() => area.innerHTML = '', 1000);
         };
+
     </script>
 </body>
 </html>
