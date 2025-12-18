@@ -10,8 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
     <style>
         @media print {
             body * { visibility: hidden; }
@@ -199,7 +197,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG (Mantido para controle de horários em tempo real)
         const firebaseConfig = {
             apiKey: "AIzaSyDBWADP0CJMbIg5dlU_F4U-LSUbZ_KGngo",
             authDomain: "agendacdc-7c58a.firebaseapp.com",
@@ -214,11 +212,9 @@
         const colRef = collection(db, "agendamentos");
 
         // ======================================================
-        // CONFIGURAÇÃO DO EMAILJS
+        // URL DO SEU SCRIPT GOOGLE (Substituindo EmailJS)
         // ======================================================
-        const EMAILJS_PUBLIC_KEY = "4tbEarblUcSQF-XMn"; 
-        const EMAILJS_SERVICE_ID = "service_dp5egap"; 
-        const EMAILJS_TEMPLATE_ID = "template_4eyd3qa"; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkCfZOtgj54l47hwmyzcvqP8muTX8dtojcOS4MQ3N1ZKqmbEhJKR7BdYPdajQVNLiVvQ/exec";
         
         // -----------------------------------------------------
         // CONFIGURAÇÃO DOS E-MAILS DAS PROFESSORAS
@@ -226,7 +222,7 @@
         // PREENCHA AQUI OS EMAILS CORRETOS
         const EMAILS_PROFESSORES = {
             // --- INFANTIL 1 ---
-            "Infantil 1A": "joaopaiva@casadecrianca.com.br",
+            "Infantil 1A": "email@escola.com",
             "Infantil 1B": "email@escola.com",
             "Infantil 1C": "email@escola.com",
             "Infantil 1D": "email@escola.com",
@@ -290,10 +286,6 @@
 
             "PADRAO": "coordenacao@escola.com" // Email caso a turma não seja encontrada
         };
-
-        (function(){
-            emailjs.init(EMAILJS_PUBLIC_KEY);
-        })();
 
         let todosDados = [];
         let isAdmin = false;
@@ -486,7 +478,7 @@ END:VCALENDAR`;
         }
 
         // ============================================
-        //  RESERVA COM ENVIO DE EMAIL E CALENDARIO
+        //  RESERVA COM GOOGLE SHEETS E EMAIL (SUBSTITUINDO EMAILJS)
         // ============================================
         window.reservarComEmail = async (id, hora, dataIso, turma) => {
             const dataBr = dataIso.split('-').reverse().join('/');
@@ -535,38 +527,39 @@ END:VCALENDAR`;
                 });
 
                 try {
-                    // 1. Salva no Firebase
+                    // 1. Salva no Firebase (Isso garante que o horário fique ocupado para outros pais IMEDIATAMENTE)
                     await updateDoc(doc(db, "agendamentos", id), { 
                         disponivel: false, 
                         pai: `${formValues.r} (Aluno: ${formValues.a})` 
                     });
 
-                    // 2. Prepara dados para Email
+                    // 2. Prepara envio para Google Sheets + Email
                     const emailProfessora = EMAILS_PROFESSORES[turma] || EMAILS_PROFESSORES["PADRAO"];
                     const tituloEvento = `Reunião Escolar - ${formValues.a}`;
                     const descEvento = `Reunião com os pais de ${formValues.a} (Resp: ${formValues.r}) da turma ${turma}.`;
                     
-                    // Gera links de calendário
+                    // Gera links de calendário para uso futuro se precisar
                     const calendarios = gerarLinksCalendario(tituloEvento, dataIso, hora, descEvento);
 
-                    const emailParams = {
-                        responsavel: formValues.r,
-                        aluno: formValues.a,
-                        data: dataBr,
-                        horario: hora,
+                    // Payload para o Google Script
+                    const dadosParaEnvio = {
+                        nomeResponsavel: formValues.r,
+                        nomeAluno: formValues.a,
                         turma: turma,
-                        to_email: formValues.e,
-                        email_professora: emailProfessora, // Variável nova para o EmailJS (CC)
-                        link_google: calendarios.googleUrl, // Link Google Calendar
-                        link_outlook: calendarios.outlookUrl // Link Outlook
+                        nomeProfessor: "Professora da " + turma, // Nome genérico ou ajustar se tiver lista de nomes
+                        emailProfessor: emailProfessora,
+                        data: dataBr,
+                        horario: hora
                     };
 
-                    try {
-                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams);
-                        console.log("Email enviado com sucesso!");
-                    } catch (errEmail) {
-                        console.error("Erro no email:", errEmail);
-                    }
+                    // Envia para o Google Script via Fetch
+                    // mode: 'no-cors' é usado para evitar bloqueio de navegador, pois o Google retorna um redirect
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        mode: "no-cors", 
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(dadosParaEnvio)
+                    });
                     
                     // 3. Baixa o arquivo ICS automaticamente
                     baixarICS(tituloEvento, calendarios.inicio, calendarios.fim, descEvento);
@@ -574,7 +567,7 @@ END:VCALENDAR`;
                     Swal.fire({
                         icon: 'success',
                         title: 'Confirmado!',
-                        text: `Agendamento realizado. Um arquivo de calendário foi baixado e a confirmação enviada para ${formValues.e}.`,
+                        text: `Agendamento realizado com sucesso para ${formValues.e}.`,
                         confirmButtonColor: '#2563eb'
                     });
 
@@ -712,4 +705,3 @@ END:VCALENDAR`;
     </script>
 </body>
 </html>
-
