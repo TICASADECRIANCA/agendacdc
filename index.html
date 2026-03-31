@@ -95,15 +95,20 @@
                 <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                     <h3 class="font-bold text-slate-800 mb-4">Abrir Novos Horários</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <select id="gen-turma" class="border p-2 rounded-lg text-sm">
-                            <option value="" disabled selected>Turma</option>
-                        </select>
+                        <div class="col-span-2">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-[10px] font-bold uppercase text-slate-400">Turmas (Selecione uma ou mais)</label>
+                                <button onclick="marcarTodasTurmas()" class="text-[10px] text-blue-600 font-bold uppercase hover:underline">Selecionar Todas</button>
+                            </div>
+                            <select id="gen-turma" multiple size="5" class="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none overflow-y-auto">
+                                </select>
+                        </div>
                         <input type="date" id="gen-data" class="border p-2 rounded-lg text-sm">
                         <div class="flex gap-2">
                             <input type="time" id="gen-inicio" value="08:00" class="border p-2 rounded-lg text-sm w-1/2">
                             <input type="time" id="gen-fim" value="11:40" class="border p-2 rounded-lg text-sm w-1/2">
                         </div>
-                        <button onclick="gerarAutomatico()" class="bg-blue-600 text-white font-bold rounded-lg py-2">Gerar Horários</button>
+                        <button onclick="gerarAutomatico()" class="bg-blue-600 text-white font-bold rounded-lg py-2 col-span-2 md:col-span-1">Gerar Horários</button>
                     </div>
                 </div>
             </div>
@@ -352,28 +357,55 @@
             if(res.isConfirmed) await deleteDoc(doc(db, "agendamentos", id));
         };
 
+        // FUNÇÃO PARA MARCAR TODAS AS TURMAS
+        window.marcarTodasTurmas = () => {
+            const select = document.getElementById('gen-turma');
+            for (let i = 0; i < select.options.length; i++) {
+                select.options[i].selected = true;
+            }
+        };
+
         window.gerarAutomatico = async () => {
-            const t = document.getElementById('gen-turma').value;
+            const selectTurmas = document.getElementById('gen-turma');
+            const turmasSelecionadas = Array.from(selectTurmas.selectedOptions).map(opt => opt.value);
+            
             const d = document.getElementById('gen-data').value;
             const inicio = document.getElementById('gen-inicio').value;
             const fim = document.getElementById('gen-fim').value;
-            if(!t || !d) return Swal.fire('Erro', 'Selecione turma e data', 'error');
 
-            const batch = writeBatch(db);
-            let atual = new Date(`2000-01-01T${inicio}`);
-            let limite = new Date(`2000-01-01T${fim}`);
+            if(turmasSelecionadas.length === 0 || !d) return Swal.fire('Erro', 'Selecione pelo menos uma turma e a data', 'error');
 
-            while(atual <= limite) {
-                const h = atual.toTimeString().substring(0, 5);
-                const ref = doc(collection(db, "agendamentos"));
-                batch.set(ref, {
-                    turma: t, data: d, horario: h, disponivel: true, pai: "",
-                    timestamp: new Date(`${d}T${h}`).getTime()
-                });
-                atual.setMinutes(atual.getMinutes() + 20);
+            Swal.fire({ title: 'Gerando...', text: 'Por favor, aguarde.', didOpen: () => Swal.showLoading() });
+
+            try {
+                const batch = writeBatch(db);
+                
+                // Percorre cada turma selecionada
+                for (const t of turmasSelecionadas) {
+                    let atual = new Date(`2000-01-01T${inicio}`);
+                    let limite = new Date(`2000-01-01T${fim}`);
+
+                    while(atual <= limite) {
+                        const h = atual.toTimeString().substring(0, 5);
+                        const ref = doc(collection(db, "agendamentos"));
+                        batch.set(ref, {
+                            turma: t,
+                            data: d,
+                            horario: h,
+                            disponivel: true,
+                            pai: "",
+                            timestamp: new Date(`${d}T${h}`).getTime()
+                        });
+                        atual.setMinutes(atual.getMinutes() + 20);
+                    }
+                }
+
+                await batch.commit();
+                Swal.fire('Gerado!', 'Horários criados com sucesso para as turmas selecionadas.', 'success');
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Erro', 'Falha ao gerar horários.', 'error');
             }
-            await batch.commit();
-            Swal.fire('Gerado!', 'Horários criados com sucesso.', 'success');
         };
 
         window.limparTudo = async () => {
@@ -407,4 +439,3 @@
     </script>
 </body>
 </html>
-
